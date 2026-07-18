@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SimitClicker — İstanbul</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="game">
+
+  <!-- SOL: Simit paneli -->
+  <section id="left">
+    <div id="sky">
+      <div class="cloud c1"><img src="img/cloud.webp" alt="" draggable="false"></div>
+      <div class="cloud c2"><img src="img/cloud.webp" alt="" draggable="false"></div>
+      <div class="cloud c3"><img src="img/cloud.webp" alt="" draggable="false"></div>
+      <div class="cloud c4"><img src="img/cloud.webp" alt="" draggable="false"></div>
+      <svg id="skyline" viewBox="0 0 600 160" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
+    </div>
+    <div id="counter">
+      <h1 id="simitCount">0 simit</h1>
+      <p id="spsCount">saniyede 0 simit</p>
+    </div>
+    <div id="simitWrap">
+      <div id="simitStage">
+        <img id="bigSimit" src="img/simit.png" alt="Simit — tıkla!" draggable="false">
+        <div id="gullRing"></div>
+        <div id="gullBadge" hidden></div>
+      </div>
+    </div>
+    <div id="buffBar"></div>
+    <div id="ticker"><span id="tickerText"></span></div>
+  </section>
+
+  <!-- ORTA: istatistik + başarımlar -->
+  <section id="middle">
+    <h2>İstanbul Simit Ajansı</h2>
+    <div id="stats">
+      <div class="stat"><span>Toplam pişen simit</span><b id="statTotal">0</b></div>
+      <div class="stat"><span>El emeği tık</span><b id="statClicks">0</b></div>
+      <div class="stat"><span>Tık başına simit</span><b id="statPerClick">1</b></div>
+      <div class="stat"><span>Yakalanan altın simit</span><b id="statGolden">0</b></div>
+    </div>
+    <h3>Başarımlar <span id="achCount"></span></h3>
+    <div id="achievements"></div>
+    <div id="saveRow">
+      <button id="btnSave">Kaydet</button>
+      <button id="btnWipe">Sıfırla</button>
+    </div>
+  </section>
+
+  <!-- SAĞ: dükkân -->
+  <section id="right">
+    <h2>Dükkân</h2>
+    <div id="upgradeShelf" title="Yükseltmeler"></div>
+    <div id="buyAmount">
+      <span>Adet:</span>
+      <button class="amt sel" data-n="1">1</button>
+      <button class="amt" data-n="10">10</button>
+      <button class="amt" data-n="100">100</button>
+    </div>
+    <div id="store"></div>
+  </section>
+
+</div>
+<div id="toasts"></div>
+<div id="tooltip" hidden></div>
+<script src="game.js"></script>
+</body>
+</html>
