@@ -11,7 +11,7 @@ const BUILDINGS = [
   { id: 'marti',   name: 'Martı',                  icon: '🕊️', cost: 15,     sps: 0.1,
     desc: 'Simidin kenarına konar, ücretini gagayla tahsil eder. Kadim İstanbul kuşu.',
     ups: ['Cesur Gaga', 'Susam Radarı', 'Poyraz Kanadı'] },
-  { id: 'tabla',   name: 'Simitçi Tablası',        icon: '🧺', cost: 100,    sps: 1,
+  { id: 'tabla',   name: 'Simitçi Tablası',        icon: '🧺', img: 'img/tabla.png', cost: 100, sps: 1,
     desc: 'Başının üstünde elli simitle Galata Köprüsü\'nü geçen usta.',
     ups: ['Dengeli Tabla', 'Çifte Tabla', 'Babadan Kalma Tabla'] },
   { id: 'araba',   name: 'Kırmızı Simit Arabası',  icon: '🛒', img: 'img/araba.png', cost: 1100, sps: 8,
