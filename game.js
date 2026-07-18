@@ -14,7 +14,7 @@ const BUILDINGS = [
   { id: 'tabla',   name: 'Simitçi Tablası',        icon: '🧺', cost: 100,    sps: 1,
     desc: 'Başının üstünde elli simitle Galata Köprüsü\'nü geçen usta.',
     ups: ['Dengeli Tabla', 'Çifte Tabla', 'Babadan Kalma Tabla'] },
-  { id: 'araba',   name: 'Kırmızı Simit Arabası',  icon: '🛒', cost: 1100,   sps: 8,
+  { id: 'araba',   name: 'Kırmızı Simit Arabası',  icon: '🛒', img: 'img/araba.png', cost: 1100, sps: 8,
     desc: 'Camlı, kırmızı, klasik. Eminönü\'nün demirbaşı.',
     ups: ['Parlak Cam', 'Yaylı Tekerlek', 'Kornalı Araba'] },
   { id: 'firin',   name: 'Mahalle Taş Fırını',     icon: '🔥', cost: 12000,  sps: 47,
@@ -125,6 +125,11 @@ function fmt(n) {
   return Math.floor(n).toLocaleString('tr-TR');
 }
 
+// emoji ya da görsel ikon üret (binalar görsel ikon taşıyabilir)
+function iconHTML(o) {
+  return o.img ? `<img class="iconImg" src="${o.img}" alt="">` : o.icon;
+}
+
 function buildingCost(b, count = 1) {
   let total = 0, owned = S.owned[b.id];
   for (let i = 0; i < count; i++) total += b.cost * Math.pow(1.15, owned + i);
@@ -136,7 +141,7 @@ const UPGRADES = [...CLICK_UPGRADES];
 BUILDINGS.forEach(b => {
   B_UP_TIERS.forEach((tier, i) => {
     UPGRADES.push({
-      id: `${b.id}_u${i}`, name: b.ups[i], icon: b.icon,
+      id: `${b.id}_u${i}`, name: b.ups[i], icon: b.icon, img: b.img,
       cost: Math.ceil(b.cost * tier.costMult),
       type: 'building', target: b.id, mult: 2, needCount: tier.need,
       desc: `${b.name} üretimi iki katına çıkar.`,
@@ -165,9 +170,9 @@ const ACHIEVEMENTS = [
   { id: 'a_g3', icon: '💫', name: 'Nazar Değmesin',     desc: '27 altın simit yakala.',          check: () => S.golden >= 27 },
 ];
 BUILDINGS.forEach(b => {
-  ACHIEVEMENTS.push({ id: `a_${b.id}_1`, icon: b.icon, name: `İlk ${b.name}`,
+  ACHIEVEMENTS.push({ id: `a_${b.id}_1`, icon: b.icon, img: b.img, name: `İlk ${b.name}`,
     desc: `Bir ${b.name} sahibi ol.`, check: () => S.owned[b.id] >= 1 });
-  ACHIEVEMENTS.push({ id: `a_${b.id}_2`, icon: b.icon, name: `${b.name} Zinciri`,
+  ACHIEVEMENTS.push({ id: `a_${b.id}_2`, icon: b.icon, img: b.img, name: `${b.name} Zinciri`,
     desc: `50 ${b.name} sahibi ol.`, check: () => S.owned[b.id] >= 50 });
 });
 
@@ -449,7 +454,7 @@ function buildStore() {
     el.className = 'building hidden';
     el.id = 'b_' + b.id;
     el.innerHTML = `
-      <div class="icon">${b.icon}</div>
+      <div class="icon">${iconHTML(b)}</div>
       <div class="info">
         <div class="name">${b.name}</div>
         <div class="price"></div>
@@ -497,7 +502,7 @@ function renderUpgrades() {
     .forEach(u => {
       const el = document.createElement('div');
       el.className = 'upgrade' + (S.simit < u.cost ? ' cant' : '');
-      el.textContent = u.icon;
+      el.innerHTML = iconHTML(u);
       el.addEventListener('click', () => buyUpgrade(u));
       el.addEventListener('mousemove', e => showTip(e, () =>
         `<b>${u.name}</b><div class="tdesc">${u.desc}</div><div class="tnum">Fiyat: ${fmt(u.cost)} simit</div>`));
@@ -515,7 +520,7 @@ function renderAchievements() {
     if (has) got++;
     const el = document.createElement('div');
     el.className = 'ach' + (has ? '' : ' locked');
-    el.textContent = a.icon;
+    el.innerHTML = iconHTML(a);
     el.addEventListener('mousemove', e => showTip(e, () =>
       `<b>${has ? a.name : '???'}</b><div class="tdesc">${a.desc}</div>`));
     el.addEventListener('mouseleave', hideTip);
@@ -589,7 +594,7 @@ function buyUpgrade(u) {
   recalc();
   renderUpgrades();
   hideTip();
-  toast(`${u.icon} <b>${u.name}</b> alındı!`);
+  toast(`${iconHTML(u)} <b>${u.name}</b> alındı!`);
 }
 
 function clickSimit(e) {
@@ -703,7 +708,7 @@ function checkAchievements() {
     if (!S.achievements[a.id] && a.check()) {
       S.achievements[a.id] = true;
       changed = true;
-      toast(`${a.icon} Başarım: <b>${a.name}</b>`);
+      toast(`${iconHTML(a)} Başarım: <b>${a.name}</b>`);
     }
   });
   if (changed) renderAchievements();
