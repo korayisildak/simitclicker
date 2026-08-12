@@ -598,6 +598,8 @@ function buyUpgrade(u) {
 }
 
 function clickSimit(e) {
+  // tık, oyuncunun burada olduğunun kanıtı: olay kaçtıysa bile fırınları yak
+  if (paused) resumeGame();
   S.simit += clickPower;
   S.total += clickPower;
   S.clicks++;
@@ -645,9 +647,10 @@ function spawnGolden() {
   g.style.filter = 'drop-shadow(0 0 18px rgba(255,215,100,0.95)) saturate(1.7) brightness(1.35)';
   left.appendChild(g);
 
-  const timeout = setTimeout(() => g.remove(), 13000);
+  // her simidin kendi ömrü: sonradan çalışsa da kopmuş elemanda remove() zararsız
+  const despawn = setTimeout(() => g.remove(), 13000);
   g.addEventListener('click', () => {
-    clearTimeout(timeout);
+    clearTimeout(despawn);
     g.remove();
     S.golden++;
     if (Math.random() < 0.55) {
@@ -667,13 +670,25 @@ function spawnGolden() {
 
   scheduleGolden();
 }
+// Zamanlayıcılar hedef zaman tutar: duraklamada kalan süre korunur, sıfırlanmaz
 let goldenTimer = null;
-function scheduleGolden() {
+let goldenDeadline = 0;
+function scheduleGolden(delay) {
   clearTimeout(goldenTimer);
-  goldenTimer = setTimeout(spawnGolden, (60 + Math.random() * 120) * 1000);
+  const ms = delay != null ? delay : (60 + Math.random() * 120) * 1000;
+  goldenDeadline = Date.now() + ms;
+  goldenTimer = setTimeout(spawnGolden, ms);
 }
 
 // ---------- Martı olayı: uçan martıyı yakala, simit bonusu kap ----------
+let gullTimer = null;
+let gullDeadline = 0;
+function scheduleGull(delay) {
+  clearTimeout(gullTimer);
+  const ms = delay != null ? delay : (90 + Math.random() * 180) * 1000;
+  gullDeadline = Date.now() + ms;
+  gullTimer = setTimeout(spawnGull, ms);
+}
 function spawnGull() {
   const left = $('left');
   const g = document.createElement('div');
@@ -681,15 +696,64 @@ function spawnGull() {
   g.textContent = '🕊️';
   g.style.top = (8 + Math.random() * 30) + '%';
   left.appendChild(g);
-  const timeout = setTimeout(() => g.remove(), 9000);
+  const despawn = setTimeout(() => g.remove(), 9000);
   g.addEventListener('click', () => {
-    clearTimeout(timeout);
+    clearTimeout(despawn);
     g.remove();
     const gain = Math.max(sps * 60, clickPower * 20);
     S.simit += gain; S.total += gain;
     toast(`🕊️ Martı ağzındaki simiti bıraktı! +${fmt(gain)}`);
   }, { once: true });
-  setTimeout(spawnGull, (90 + Math.random() * 180) * 1000);
+  scheduleGull();
+}
+
+// ---------- Duraklatma: fırınlar yalnızca bu sekme görünürken çalışır ----------
+let paused = false;
+let pauseStart = 0;
+let goldenLeft = 0;   // duraklamada donan olay geri sayımları
+let gullLeft = 0;
+const PAUSED_TITLE = '⏸️ Fırınlar durdu — geri dön!';
+// olay dönünce hemen patlamasın; ekrana yerleşecek kadar beklesin
+const MIN_EVENT_DELAY = 1500;
+
+function pauseGame() {
+  if (paused) return;
+  paused = true;
+  pauseStart = Date.now();
+  // süresi zaten bitmiş buff'ları temizle: dondururken dirilmesinler
+  Object.entries(S.buffs).forEach(([k, end]) => {
+    if (!end || end <= pauseStart) delete S.buffs[k];
+  });
+  // olay geri sayımları da donar: dönünce baştan başlamaz, kaldığı yerden sürer
+  goldenLeft = Math.max(0, goldenDeadline - pauseStart);
+  gullLeft = Math.max(0, gullDeadline - pauseStart);
+  clearTimeout(goldenTimer);
+  clearTimeout(gullTimer);
+  // kimsenin görmediği fırsat ekranda beklemesin
+  document.querySelectorAll('#goldenSimit, .gull').forEach(el => el.remove());
+  recalc();
+  save(true);
+  document.title = PAUSED_TITLE;
+}
+
+function resumeGame() {
+  if (!paused) return;
+  const away = Math.max(0, Date.now() - pauseStart);
+  paused = false;
+  lastTick = Date.now();
+  // buff'lar da donmuştu: kalan süreyi aynen geri ver
+  Object.keys(S.buffs).forEach(k => { S.buffs[k] += away; });
+  recalc();
+  scheduleGolden(Math.max(MIN_EVENT_DELAY, goldenLeft));
+  scheduleGull(Math.max(MIN_EVENT_DELAY, gullLeft));
+  renderCounters();
+  renderBuffs();
+  if (away > 20000) toast('▶️ Hoş geldin! Fırınlar yeniden çalışıyor.');
+}
+
+function syncVisibility() {
+  if (document.hidden) pauseGame();
+  else resumeGame();
 }
 
 // ---------- Haber bandı ----------
@@ -756,14 +820,7 @@ function load() {
     Object.assign(S.owned, d.owned || {});
     Object.assign(S.upgrades, d.upgrades || {});
     Object.assign(S.achievements, d.achievements || {});
-    // çevrimdışı kazanç (en fazla 2 saat, %25 verim)
-    recalc();
-    const away = Math.min((Date.now() - (d.ts || Date.now())) / 1000, 7200);
-    if (away > 60 && sps > 0) {
-      const gain = sps * away * 0.25;
-      S.simit += gain; S.total += gain;
-      toast(`🌙 Sen yokken fırınlar çalıştı: +${fmt(gain)} simit`);
-    }
+    // çevrimdışı kazanç yok: fırınlar yalnızca sekme açıkken çalışır
   } catch (e) { console.warn('Kayıt okunamadı', e); }
 }
 function wipe() {
@@ -775,9 +832,13 @@ function wipe() {
 
 // ---------- Döngüler ----------
 let lastTick = Date.now();
+// döngü dondurulduysa (sekme gizli, bilgisayar uykuda) aradaki boşluk simide dönmesin
+const MAX_TICK_DT = 1;
 function tick() {
+  if (paused) return;
   const now = Date.now();
-  const dt = (now - lastTick) / 1000;
+  // saat geriye giderse (NTP düzeltmesi, uykudan dönüş) eksi kazanç yazmasın
+  const dt = Math.max(0, Math.min((now - lastTick) / 1000, MAX_TICK_DT));
   lastTick = now;
   // buff süresi bitince yeniden hesapla
   Object.entries(S.buffs).forEach(([k, end]) => {
@@ -791,6 +852,7 @@ function tick() {
 }
 
 function slowTick() {
+  if (paused) return;
   recalc();
   renderStore();
   renderUpgrades();
@@ -825,11 +887,17 @@ function init() {
 
   setInterval(tick, 100);
   setInterval(slowTick, 500);
-  setInterval(rotateNews, 12000);
+  setInterval(() => { if (!paused) rotateNews(); }, 12000);
   setInterval(() => save(true), 30000);
   addEventListener('beforeunload', () => save(true));
+  // sekme gizlenince / kapanınca her şey donar, geri dönünce kaldığı yerden sürer
+  document.addEventListener('visibilitychange', syncVisibility);
+  addEventListener('pagehide', pauseGame);
+  addEventListener('pageshow', syncVisibility);
+  addEventListener('focus', syncVisibility);
   scheduleGolden();
-  setTimeout(spawnGull, (45 + Math.random() * 90) * 1000);
+  scheduleGull((45 + Math.random() * 90) * 1000); // ilk martı daha erken uğrar
+  syncVisibility();
 }
 
 init();
