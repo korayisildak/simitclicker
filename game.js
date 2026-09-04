@@ -8,7 +8,7 @@
 
 // ---------- Binalar (İstanbul odaklı) ----------
 const BUILDINGS = [
-  { id: 'marti',   name: 'Martı',                  icon: '🕊️', cost: 15,     sps: 0.1,
+  { id: 'marti',   name: 'Martı',                  icon: '🕊️', img: 'img/marti.webp', cost: 15, sps: 0.1,
     desc: 'Simidin kenarına konar, ücretini gagayla tahsil eder. Kadim İstanbul kuşu.',
     ups: ['Cesur Gaga', 'Susam Radarı', 'Poyraz Kanadı'] },
   { id: 'tabla',   name: 'Simitçi Tablası',        icon: '🧺', img: 'img/tabla.png', cost: 100, sps: 1,
@@ -287,20 +287,8 @@ function gullJitter(i, salt) {
   const x = Math.sin(i * 127.1 + salt * 311.7) * 43758.5453;
   return x - Math.floor(x);
 }
-function gullSVG() {
-  // kuşbakışı martı, gagası aşağıda (simidin merkezine dönük)
-  return `<svg class="gullBody" viewBox="0 0 48 50" xmlns="http://www.w3.org/2000/svg">
-    <path d="M24 27 C14 25 4 19 1 8 C10 16 17 20 24 21 Z" fill="#cdd5dc"/>
-    <path d="M24 27 C34 25 44 19 47 8 C38 16 31 20 24 21 Z" fill="#cdd5dc"/>
-    <path d="M1 8 C3 10 5 11 8 12 L5 8 Z" fill="#42474e"/>
-    <path d="M47 8 C45 10 43 11 40 12 L43 8 Z" fill="#42474e"/>
-    <path d="M20 16 L24 4 L28 16 Z" fill="#dfe4e9"/>
-    <ellipse cx="24" cy="27" rx="8.5" ry="12" fill="#f4f6f8"/>
-    <circle cx="24" cy="38" r="6" fill="#f4f6f8"/>
-    <circle cx="21.6" cy="38.5" r="1.1" fill="#22252a"/>
-    <circle cx="26.4" cy="38.5" r="1.1" fill="#22252a"/>
-    <path d="M22 43 L24 49 L26 43 Z" fill="#f0a030"/>
-  </svg>`;
+function gullImage() {
+  return '<img class="gullBody" src="img/marti.webp" alt="">';
 }
 let gullCount = -1;
 function updateGulls() {
@@ -308,7 +296,7 @@ function updateGulls() {
   const n = Math.min(owned, GULL_CAP);
   const badge = $('gullBadge');
   badge.hidden = owned <= GULL_CAP;
-  if (!badge.hidden) badge.textContent = `🕊️ ×${owned.toLocaleString('tr-TR')} martı`;
+  if (!badge.hidden) badge.innerHTML = `${iconHTML(BUILDINGS[0])} ×${owned.toLocaleString('tr-TR')} martı`;
   if (n === gullCount) return;
   gullCount = n;
   const ring = $('gullRing');
@@ -323,7 +311,7 @@ function updateGulls() {
     spot.style.setProperty('--s', size.toFixed(1) + 'px');
     spot.style.setProperty('--dur', (1.6 + gullJitter(i, 3) * 1.6).toFixed(2) + 's');
     spot.style.setProperty('--d', (-gullJitter(i, 4) * 3).toFixed(2) + 's');
-    spot.innerHTML = gullSVG();
+    spot.innerHTML = gullImage();
     ring.appendChild(spot);
   }
   layoutGulls();
@@ -691,9 +679,11 @@ function scheduleGull(delay) {
 }
 function spawnGull() {
   const left = $('left');
-  const g = document.createElement('div');
+  const g = document.createElement('img');
   g.className = 'gull';
-  g.textContent = '🕊️';
+  g.src = 'img/marti.webp';
+  g.alt = 'Uçan martı';
+  g.draggable = false;
   g.style.top = (8 + Math.random() * 30) + '%';
   left.appendChild(g);
   const despawn = setTimeout(() => g.remove(), 9000);
@@ -702,7 +692,7 @@ function spawnGull() {
     g.remove();
     const gain = Math.max(sps * 60, clickPower * 20);
     S.simit += gain; S.total += gain;
-    toast(`🕊️ Martı ağzındaki simiti bıraktı! +${fmt(gain)}`);
+    toast(`${iconHTML(BUILDINGS[0])} Martı ağzındaki simiti bıraktı! +${fmt(gain)}`);
   }, { once: true });
   scheduleGull();
 }

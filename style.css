@@ -134,7 +134,8 @@ body {
   position: absolute;
   width: var(--s);
   height: auto;
-  aspect-ratio: 48 / 50;
+  aspect-ratio: 1;
+  object-fit: contain;
   transform: translate(-50%, -50%);
   filter: drop-shadow(0 2px 3px rgba(0,0,0,0.35));
   animation: peck var(--dur) ease-in-out var(--d) infinite;
@@ -207,8 +208,11 @@ body {
 .gull {
   position: absolute;
   z-index: 7;
-  font-size: 42px;
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
   cursor: pointer;
+  -webkit-user-drag: none;
   animation: gullFly 9s linear forwards;
   filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));
 }
