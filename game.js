@@ -732,7 +732,6 @@ function pauseGame() {
   // kimsenin görmediği fırsat ekranda beklemesin
   document.querySelectorAll('#goldenSimit, .gull').forEach(el => el.remove());
   recalc();
-  save(true);
   document.title = PAUSED_TITLE;
 }
 
@@ -781,11 +780,12 @@ function checkAchievements() {
 // ---------- Kaydet / yükle ----------
 const SAVE_KEY = 'simitclicker-istanbul';
 const SAVE_VERSION = 2;
-let wiping = false; // sıfırlama sonrası beforeunload/interval kaydını engelle
+let wiping = false;
 function save(silent) {
   if (wiping) return;
   localStorage.setItem(SAVE_KEY, JSON.stringify({
     v: SAVE_VERSION,
+    manual: true,
     simit: S.simit, total: S.total, clicks: S.clicks, golden: S.golden,
     owned: S.owned, upgrades: S.upgrades, achievements: S.achievements,
     ts: Date.now(),
@@ -815,6 +815,10 @@ function load() {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return;
     const d = migrateSave(JSON.parse(raw));
+    // Önceki sürümlerde aynı anahtara otomatik kayıt yazılıyordu. Kaynağı
+    // ayırt edilemeyen bu kayıtları yükleme; yalnızca Kaydet düğmesiyle
+    // oluşturulan yeni kayıtlar bir sonraki oturuma taşınır.
+    if (d.manual !== true) return;
     S.simit = d.simit || 0; S.total = d.total || 0;
     S.clicks = d.clicks || 0; S.golden = d.golden || 0;
     Object.assign(S.owned, d.owned || {});
@@ -888,8 +892,6 @@ function init() {
   setInterval(tick, 100);
   setInterval(slowTick, 500);
   setInterval(() => { if (!paused) rotateNews(); }, 12000);
-  setInterval(() => save(true), 30000);
-  addEventListener('beforeunload', () => save(true));
   // sekme gizlenince / kapanınca her şey donar, geri dönünce kaldığı yerden sürer
   document.addEventListener('visibilitychange', syncVisibility);
   addEventListener('pagehide', pauseGame);

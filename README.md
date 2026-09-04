@@ -10,7 +10,7 @@
 - Her alınan Martı, simidin kenarına konup gagalayan bir martı ekler
 - 42 yükseltme, 35 başarım, altın simit ve uçan martı olayları
 - İstanbul silüeti (gerçek renkleriyle), süzülen bulutlar, dönen haber bandı
-- Çevrimdışı kazanç ve otomatik kayıt (localStorage)
+- Çevrimdışı kazanç yok; ilerleme yalnızca **Kaydet** düğmesine basıldığında tarayıcıda saklanır
 
 ## Yerelde çalıştırma
 
