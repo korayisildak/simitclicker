@@ -48,7 +48,7 @@ const BUILDINGS = [
 
 // ---------- Tık yükseltmeleri ----------
 const CLICK_UPGRADES = [
-  { id: 'c1', name: 'Susam Serpme',      icon: '🌰', cost: 100,   type: 'click',    mult: 2,
+  { id: 'c1', name: 'Susam Serpme',      icon: '🌰', img: 'img/sesame.png', cost: 100, type: 'click', mult: 2,
     desc: 'Her tık iki kat simit. Susamsız simit, çaysız sohbet gibi.' },
   { id: 'c2', name: 'Çıtır Hamur',       icon: '🥨', cost: 5000,  type: 'click',    mult: 2,
     desc: 'Dışı çıtır, içi yumuşak. Tık gücü x2.' },
@@ -157,7 +157,7 @@ function upgradeVisible(u) {
 
 // ---------- Başarımlar ----------
 const ACHIEVEMENTS = [
-  { id: 'a_t1', icon: '🥯', name: 'İlk Fırın Çıkışı',   desc: 'Toplam 100 simit piştir.',        check: () => S.total >= 100 },
+  { id: 'a_t1', icon: '🥯', img: 'img/simit-icon.png', name: 'İlk Fırın Çıkışı', desc: 'Toplam 100 simit piştir.', check: () => S.total >= 100 },
   { id: 'a_t2', icon: '🧡', name: 'Mahallenin Gururu',  desc: 'Toplam 10.000 simit piştir.',     check: () => S.total >= 1e4 },
   { id: 'a_t3', icon: '🌆', name: 'Semtin Efsanesi',    desc: 'Toplam 1 milyon simit piştir.',   check: () => S.total >= 1e6 },
   { id: 'a_t4', icon: '🌉', name: 'İki Kıtanın Fırıncısı', desc: 'Toplam 1 milyar simit piştir.', check: () => S.total >= 1e9 },
