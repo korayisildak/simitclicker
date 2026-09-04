@@ -334,8 +334,7 @@ function drawSkyline() {
     <filter id="soft" x="-10%" y="-20%" width="120%" height="140%"><feGaussianBlur stdDeviation="1.2"/></filter>
   </defs>
 
-  <!-- Uzak tepeler ve puslu şehir -->
-  <path d="M0 105 Q55 74 112 96 T220 88 T335 98 T450 77 T600 94 V145 H0Z" fill="#6f879a" opacity=".28"/>
+  <!-- Uzak, puslu şehir -->
   <g fill="#526b80" opacity=".32" filter="url(#soft)">
     <path d="M0 112V91h10v-9h8v30M28 112V78h13v34M48 112V88h19v24M126 112V80h11v32M142 112V70h16v42M168 112V87h25v25M345 112V76h15v36M365 112V91h23v21M472 112V75h13v37M492 112V86h28v26M540 112V73h17v39M565 112V82h24v30"/>
   </g>
@@ -406,11 +405,13 @@ function drawSkyline() {
   </g>
 
   <!-- Şehir hatları vapuru -->
-  <g class="ferry" transform="translate(145 137)">
-    <path d="M0 7h43l-6 7H7z" fill="#f3eee3" stroke="#32495a" stroke-width=".8"/>
-    <path d="M8 0h25l5 7H5z" fill="#f7f2e8"/><path d="M15-5h12v5H15z" fill="#f0dfbc"/>
-    <path d="M11 3h5m4 0h5m4 0h5" stroke="#447d9a" stroke-width="2"/>
-    <path d="M4 9h35" stroke="#c94e3c" stroke-width="1.5"/>
+  <g transform="translate(364 137)">
+    <g class="ferry">
+      <path d="M0 7h43l-6 7H7z" fill="#f3eee3" stroke="#32495a" stroke-width=".8"/>
+      <path d="M8 0h25l5 7H5z" fill="#f7f2e8"/><path d="M15-5h12v5H15z" fill="#f0dfbc"/>
+      <path d="M11 3h5m4 0h5m4 0h5" stroke="#447d9a" stroke-width="2"/>
+      <path d="M4 9h35" stroke="#c94e3c" stroke-width="1.5"/>
+    </g>
   </g>
 
   <!-- Kalem çizgisi martılar -->

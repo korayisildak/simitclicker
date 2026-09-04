@@ -78,10 +78,10 @@ body {
 }
 
 #skyline .water-glint { animation: waterGlint 5s ease-in-out infinite alternate; }
-#skyline .ferry { animation: ferryDrift 22s ease-in-out infinite alternate; }
+#skyline .ferry { animation: ferryDrift 16s ease-in-out infinite alternate; }
 #skyline .window-glow { animation: windowGlow 3.6s ease-in-out infinite alternate; }
 @keyframes waterGlint { to { opacity: 0.75; transform: translateX(8px); } }
-@keyframes ferryDrift { to { transform: translateX(18px); } }
+@keyframes ferryDrift { to { transform: translateX(6px); } }
 @keyframes windowGlow { to { opacity: 0.45; } }
 @media (prefers-reduced-motion: reduce) {
   #skyline .water-glint, #skyline .ferry, #skyline .window-glow { animation: none; }
