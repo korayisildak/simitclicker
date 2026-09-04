@@ -73,6 +73,18 @@ body {
   bottom: 0; left: 0;
   width: 100%; height: 32%;
   min-height: 130px;
+  filter: drop-shadow(0 -5px 18px rgba(31, 61, 88, 0.12));
+  overflow: visible;
+}
+
+#skyline .water-glint { animation: waterGlint 5s ease-in-out infinite alternate; }
+#skyline .ferry { animation: ferryDrift 22s ease-in-out infinite alternate; }
+#skyline .window-glow { animation: windowGlow 3.6s ease-in-out infinite alternate; }
+@keyframes waterGlint { to { opacity: 0.75; transform: translateX(8px); } }
+@keyframes ferryDrift { to { transform: translateX(18px); } }
+@keyframes windowGlow { to { opacity: 0.45; } }
+@media (prefers-reduced-motion: reduce) {
+  #skyline .water-glint, #skyline .ferry, #skyline .window-glow { animation: none; }
 }
 
 #counter {

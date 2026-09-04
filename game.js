@@ -322,114 +322,100 @@ function layoutGulls() {
   $('gullRing').style.setProperty('--R', (stage.clientWidth / 2 * 0.93).toFixed(0) + 'px');
 }
 
-// ---------- İstanbul silueti (gerçek renkler) ----------
+// ---------- Katmanlı, illüstratif İstanbul silueti ----------
 function drawSkyline() {
   const svg = $('skyline');
   svg.innerHTML = `
-  <!-- Boğaz suyu -->
-  <rect x="0" y="140" width="600" height="20" fill="#3a729c"/>
-  <g stroke="#6ea3c7" stroke-width="1.4" opacity="0.7" fill="none">
-    <path d="M20 146 h14 M60 151 h12 M150 148 h16 M260 152 h14 M370 147 h12 M470 151 h16 M545 146 h12"/>
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#3f83ae"/><stop offset="1" stop-color="#245d87"/></linearGradient>
+    <linearGradient id="hill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#788ba0"/><stop offset="1" stop-color="#4b6175"/></linearGradient>
+    <linearGradient id="stone" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#d7c4a4"/><stop offset="0.55" stop-color="#b9a487"/><stop offset="1" stop-color="#8d7964"/></linearGradient>
+    <linearGradient id="dome" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8999a5"/><stop offset="1" stop-color="#4e606f"/></linearGradient>
+    <filter id="soft" x="-10%" y="-20%" width="120%" height="140%"><feGaussianBlur stdDeviation="1.2"/></filter>
+  </defs>
+
+  <!-- Uzak tepeler ve puslu şehir -->
+  <path d="M0 105 Q55 74 112 96 T220 88 T335 98 T450 77 T600 94 V145 H0Z" fill="#6f879a" opacity=".28"/>
+  <g fill="#526b80" opacity=".32" filter="url(#soft)">
+    <path d="M0 112V91h10v-9h8v30M28 112V78h13v34M48 112V88h19v24M126 112V80h11v32M142 112V70h16v42M168 112V87h25v25M345 112V76h15v36M365 112V91h23v21M472 112V75h13v37M492 112V86h28v26M540 112V73h17v39M565 112V82h24v30"/>
   </g>
 
-  <!-- sol evler: Balat tonları -->
-  <rect x="0" y="105" width="30" height="40" fill="#c4705c"/>
-  <rect x="0" y="105" width="30" height="4" fill="#8f4f40"/>
-  <rect x="28" y="118" width="24" height="30" fill="#dfa851"/>
-  <rect x="28" y="118" width="24" height="4" fill="#a97c33"/>
-  <rect x="50" y="98" width="20" height="50" fill="#7e93a8"/>
-  <rect x="50" y="98" width="20" height="4" fill="#5a6f83"/>
-  <g fill="#3f4854" opacity="0.75">
-    <rect x="6" y="115" width="5" height="8"/><rect x="18" y="115" width="5" height="8"/>
-    <rect x="6" y="130" width="5" height="8"/><rect x="18" y="130" width="5" height="8"/>
-    <rect x="33" y="126" width="4" height="7"/><rect x="43" y="126" width="4" height="7"/>
-    <rect x="55" y="106" width="4" height="7"/><rect x="62" y="106" width="4" height="7"/>
-    <rect x="55" y="120" width="4" height="7"/><rect x="62" y="120" width="4" height="7"/>
+  <!-- Yedi tepenin birbirine geçen kıyı dokusu -->
+  <path d="M0 128 Q48 96 101 111 Q150 83 207 112 Q263 86 322 118 Q377 94 430 115 Q495 85 600 112 V146 H0Z" fill="url(#hill)"/>
+  <g stroke="#30485c" stroke-width=".7" opacity=".75">
+    <path d="M0 132L15 108l16 5 13-17 18 9 12-21 18 18 16-6 17 20 17-25 19 12 15-25 19 23 17-8 14 18 17-33 18 17 14-14 17 28 18-16 15 17 17-29 20 17 15-11 16 24 18-31 16 20 16-13 17 28 18-24 16 9 16-21 18 25 18-14 18 22 18-31 21 28 17-12 25 21v24H0z" fill="#405a70"/>
   </g>
 
-  <!-- Galata Kulesi: taş gövde, kurşuni külah -->
-  <rect x="86" y="55" width="22" height="90" fill="#c7b49a"/>
-  <rect x="97" y="55" width="11" height="90" fill="#b5a184" opacity="0.7"/>
-  <path d="M84 55 h26 l-4 -10 h-18 z" fill="#a8927a"/>
-  <path d="M97 28 l9 17 h-18 z" fill="#535b63"/>
-  <circle cx="97" cy="27" r="2" fill="#535b63"/>
-  <g fill="#5d5142" opacity="0.8">
-    <rect x="90" y="62" width="4" height="7" rx="2"/><rect x="100" y="62" width="4" height="7" rx="2"/>
-    <rect x="90" y="80" width="4" height="7" rx="2"/><rect x="100" y="80" width="4" height="7" rx="2"/>
-    <rect x="90" y="98" width="4" height="7" rx="2"/><rect x="100" y="98" width="4" height="7" rx="2"/>
+  <!-- Sıra evler: küçük çıkmalar, çatılar ve sıcak pencereler -->
+  <g stroke="#3d4955" stroke-width=".8">
+    <path d="M0 145v-29l14-7 14 5v31M29 145v-39h25v39M55 145v-31l13-8 15 6v33M116 145v-27l13-8 17 8v27M147 145v-39h23v39M171 145v-27l15-10 16 9v28M304 145v-34l17-8 17 8v34M339 145v-27h25v27M365 145v-33l14-8 15 9v32M461 145v-28l17-10 16 8v30M495 145v-40h25v40M521 145v-31l15-9 16 9v31M553 145v-40h25v40M579 145v-31h21v31" fill="#bd8063"/>
+    <path d="M29 106l12-8 13 8M147 106l11-9 12 9M339 118l12-8 13 8M495 105l12-10 13 10M553 105l12-9 13 9" fill="#704e49"/>
+    <g fill="#f4c870" class="window-glow" stroke="none" opacity=".8">
+      <path d="M8 121h5v7H8zm11-3h5v7h-5zm17-4h5v7h-5zm10 0h5v7h-5zm16 5h5v7h-5zm10-2h5v7h-5zm53 4h5v7h-5zm10 0h5v7h-5zm18-7h5v7h-5zm9 0h5v7h-5zm146 5h5v7h-5zm11-3h5v7h-5zm27 8h5v7h-5zm11 0h5v7h-5zm103-2h5v7h-5zm11-3h5v7h-5zm29-9h5v7h-5zm11 0h5v7h-5zm25 8h5v7h-5zm11-2h5v7h-5zm22-5h5v7h-5zm10 0h5v7h-5z"/>
+    </g>
   </g>
 
-  <!-- orta evler -->
-  <rect x="120" y="110" width="26" height="35" fill="#b06a52"/>
-  <rect x="120" y="110" width="26" height="4" fill="#84503e"/>
-  <rect x="144" y="100" width="20" height="45" fill="#cf9c5e"/>
-  <rect x="144" y="100" width="20" height="4" fill="#9c7442"/>
-  <g fill="#43424e" opacity="0.7">
-    <rect x="125" y="118" width="4" height="7"/><rect x="135" y="118" width="4" height="7"/>
-    <rect x="125" y="131" width="4" height="7"/><rect x="135" y="131" width="4" height="7"/>
-    <rect x="149" y="108" width="4" height="7"/><rect x="156" y="108" width="4" height="7"/>
-    <rect x="149" y="122" width="4" height="7"/><rect x="156" y="122" width="4" height="7"/>
+  <!-- Galata Kulesi -->
+  <g stroke="#5e5145" stroke-width=".8">
+    <path d="M83 145l3-79h24l3 79z" fill="url(#stone)"/>
+    <path d="M82 66h30l-4-12H86z" fill="#927d67"/><path d="M84 54l14-27 12 27z" fill="#455666"/>
+    <path d="M98 27v-6" stroke="#d5ad4e"/><circle cx="98" cy="20" r="1.5" fill="#d5ad4e" stroke="none"/>
+    <path d="M89 72h18M88 80h20" fill="none" opacity=".55"/>
+    <g fill="#405364"><path d="M90 88q3-5 6 0v8h-6zM100 88q3-5 6 0v8h-6zM91 108q3-5 6 0v8h-6zM100 108q3-5 6 0v8h-6z"/></g>
   </g>
 
-  <!-- cami: taş duvar, kurşun kubbe, altın alem -->
-  <rect x="196" y="45" width="6" height="100" fill="#d9d0be"/>
-  <path d="M195 45 l4 -14 l4 14 z" fill="#5f6a74"/>
-  <rect x="194.5" y="70" width="9" height="4" fill="#bdb29b"/>
-  <rect x="292" y="45" width="6" height="100" fill="#d9d0be"/>
-  <path d="M291 45 l4 -14 l4 14 z" fill="#5f6a74"/>
-  <rect x="290.5" y="70" width="9" height="4" fill="#bdb29b"/>
-  <path d="M212 145 v-30 q35 -42 70 0 v30 z" fill="#7d8893"/>
-  <path d="M212 145 v-30 q35 -42 70 0" fill="none" stroke="#68737e" stroke-width="1.5"/>
-  <path d="M247 84 v-5" stroke="#c9a84c" stroke-width="1.6" fill="none"/>
-  <circle cx="247" cy="77.5" r="1.6" fill="#c9a84c"/>
-  <rect x="215" y="125" width="64" height="20" fill="#d8cfc0"/>
-  <g fill="#7a7263" opacity="0.8">
-    <rect x="220" y="130" width="5" height="10" rx="2.5"/><rect x="232" y="130" width="5" height="10" rx="2.5"/>
-    <rect x="244" y="130" width="5" height="10" rx="2.5"/><rect x="256" y="130" width="5" height="10" rx="2.5"/>
-    <rect x="268" y="130" width="5" height="10" rx="2.5"/>
-  </g>
-  <path d="M206 145 v-18 q9 -12 18 0 v18 z" fill="#8b96a1"/>
-  <path d="M270 145 v-18 q9 -12 18 0 v18 z" fill="#8b96a1"/>
-
-  <!-- Boğaz Köprüsü: çelik kuleler, koyu tabliye -->
-  <path d="M320 145 v-38 M330 145 v-38" stroke="#75808c" stroke-width="5" fill="none"/>
-  <path d="M318 116 h14" stroke="#75808c" stroke-width="3" fill="none"/>
-  <path d="M445 145 v-38 M455 145 v-38" stroke="#75808c" stroke-width="5" fill="none"/>
-  <path d="M443 116 h14" stroke="#75808c" stroke-width="3" fill="none"/>
-  <path d="M325 108 q60 34 120 0" stroke="#5a6570" stroke-width="3.5" fill="none"/>
-  <g stroke="#5a6570" stroke-width="1.2" opacity="0.85" fill="none">
-    <path d="M345 116 v13 M365 121 v9 M390 124 v7 M415 121 v9 M435 116 v13"/>
-  </g>
-  <rect x="318" y="128" width="142" height="8" fill="#454e57"/>
-  <rect x="318" y="128" width="142" height="2.5" fill="#333b43"/>
-
-  <!-- Kız Kulesi: beyaz gövde, kurşuni külah -->
-  <rect x="500" y="95" width="16" height="50" fill="#f0e9da"/>
-  <path d="M497 95 h22 l-3 -8 h-16 z" fill="#d9d1c0"/>
-  <path d="M508 74 l7 13 h-14 z" fill="#5c6873"/>
-  <circle cx="508" cy="73" r="1.8" fill="#5c6873"/>
-  <g fill="#6f8291" opacity="0.85">
-    <rect x="504" y="102" width="3.5" height="6" rx="1.7"/><rect x="510" y="102" width="3.5" height="6" rx="1.7"/>
-    <rect x="504" y="116" width="3.5" height="6" rx="1.7"/><rect x="510" y="116" width="3.5" height="6" rx="1.7"/>
+  <!-- Tarihi yarımada: ana kubbe, yarım kubbeler, revaklar -->
+  <g>
+    <path d="M206 145v-28h82v28z" fill="#c7bca8"/>
+    <path d="M215 119q9-20 18 0M261 119q9-20 18 0" fill="url(#dome)"/>
+    <path d="M222 116q25-47 50 0z" fill="url(#dome)" stroke="#4c6070"/>
+    <path d="M247 73v-7" stroke="#d7ae48"/><circle cx="247" cy="64.5" r="1.7" fill="#d7ae48"/>
+    <g fill="#5c6870"><path d="M214 130q4-8 8 0v15h-8zM228 130q4-8 8 0v15h-8zM242 130q4-8 8 0v15h-8zM256 130q4-8 8 0v15h-8zM270 130q4-8 8 0v15h-8z"/></g>
+    <g fill="#d8cebb" stroke="#7b756c" stroke-width=".6">
+      <path d="M196 145l2-96h7l2 96zM289 145l2-96h7l2 96z"/>
+      <path d="M196 49h11l-3-8h-5zM289 49h11l-3-8h-5z" fill="#667683"/>
+      <path d="M199 41l3-14 3 14M292 41l3-14 3 14" fill="#536574"/>
+      <path d="M195 72h13M288 72h13" fill="none" stroke-width="2"/>
+    </g>
   </g>
 
-  <!-- sağ evler -->
-  <rect x="540" y="112" width="24" height="33" fill="#c98a52"/>
-  <rect x="540" y="112" width="24" height="4" fill="#96632f"/>
-  <rect x="562" y="102" width="38" height="43" fill="#a85a4c"/>
-  <rect x="562" y="102" width="38" height="4" fill="#7c4136"/>
-  <g fill="#463f4a" opacity="0.7">
-    <rect x="546" y="120" width="4" height="7"/><rect x="555" y="120" width="4" height="7"/>
-    <rect x="546" y="133" width="4" height="7"/><rect x="555" y="133" width="4" height="7"/>
-    <rect x="570" y="110" width="5" height="8"/><rect x="581" y="110" width="5" height="8"/><rect x="591" y="110" width="5" height="8"/>
-    <rect x="570" y="125" width="5" height="8"/><rect x="581" y="125" width="5" height="8"/><rect x="591" y="125" width="5" height="8"/>
+  <!-- Boğaz Köprüsü; kablolar iki eğriyle daha doğal -->
+  <g fill="none" stroke="#445768">
+    <path d="M323 132V91h10v41M446 132V91h10v41" stroke-width="3.5"/>
+    <path d="M322 99h12M445 99h12" stroke-width="2"/>
+    <path d="M328 92Q389 139 451 92M328 94Q389 130 451 94" stroke-width="1.8"/>
+    <path d="M344 103v25M360 112v16M376 120v8M392 124v4M408 120v8M424 112v16M440 103v25" stroke-width=".75"/>
+    <path d="M312 128Q390 125 468 128" stroke="#2f414f" stroke-width="5"/>
+    <path d="M314 126Q390 123 466 126" stroke="#d3a94f" stroke-width=".8" stroke-dasharray="5 4"/>
   </g>
 
-  <!-- uzak martılar -->
-  <g fill="none" stroke="#4a6076" stroke-width="1.6" opacity="0.8">
-    <path d="M60 40 q6 -7 12 0 q6 -7 12 0"/>
-    <path d="M380 62 q5 -6 10 0 q5 -6 10 0"/>
-    <path d="M470 35 q6 -7 12 0 q6 -7 12 0"/>
+  <!-- Boğaz ve yansımalar -->
+  <path d="M0 140Q70 137 140 141T280 140T420 141T600 139V160H0Z" fill="url(#water)"/>
+  <g class="water-glint" fill="none" stroke-linecap="round">
+    <path d="M14 147h25m9 5h34m35-6h21m22 7h42m64-7h29m76 5h33m43-5h20m44 7h48" stroke="#8fc5dc" stroke-width="1.4" opacity=".7"/>
+    <path d="M88 156h50m82-2h26m62 3h55m99-2h40" stroke="#d6e6e8" opacity=".38"/>
+  </g>
+
+  <!-- Kız Kulesi adacığı -->
+  <g>
+    <ellipse cx="510" cy="143" rx="25" ry="3" fill="#263f51"/>
+    <path d="M500 142V99h20v43z" fill="#eee4d2" stroke="#776f64" stroke-width=".8"/>
+    <path d="M496 99h28l-4-9h-20z" fill="#c8bca7"/>
+    <path d="M501 90l9-18 10 18z" fill="#526573"/><path d="M510 72v-5" stroke="#d5ad4e"/>
+    <g fill="#6c8391"><path d="M504 106q2.5-4 5 0v7h-5zM512 106q2.5-4 5 0v7h-5zM504 120q2.5-4 5 0v7h-5zM512 120q2.5-4 5 0v7h-5z"/></g>
+  </g>
+
+  <!-- Şehir hatları vapuru -->
+  <g class="ferry" transform="translate(145 137)">
+    <path d="M0 7h43l-6 7H7z" fill="#f3eee3" stroke="#32495a" stroke-width=".8"/>
+    <path d="M8 0h25l5 7H5z" fill="#f7f2e8"/><path d="M15-5h12v5H15z" fill="#f0dfbc"/>
+    <path d="M11 3h5m4 0h5m4 0h5" stroke="#447d9a" stroke-width="2"/>
+    <path d="M4 9h35" stroke="#c94e3c" stroke-width="1.5"/>
+  </g>
+
+  <!-- Kalem çizgisi martılar -->
+  <g fill="none" stroke="#3f596e" stroke-width="1.35" stroke-linecap="round" opacity=".8">
+    <path d="M53 47q6-7 12 0q6-7 12 0M369 54q5-6 10 0q5-6 10 0M479 35q6-7 12 0q6-7 12 0"/>
   </g>`;
 }
 
