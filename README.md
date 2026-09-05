@@ -1,24 +1,51 @@
-# 🥯 SimitClicker — İstanbul
+# simit.cafe
 
-İstanbul temalı artımlı (incremental/clicker) oyun. Simide tıkla, martılar simidi tırtıklasın, Galata'dan Boğaz Köprüsü'ne İstanbul'un simit imparatorluğunu kur.
+İstanbul temalı artımlı tarayıcı oyunu. Bir simitle başla, ekibini kur, yedi semti keşfet.
 
-**Oyna:** https://korayisildak.github.io/simitclicker/
+[Oyunu aç](https://korayisildak.github.io/simitclicker/)
 
-## Özellikler
+## Üçüncü sürüm
 
-- 12 İstanbul temalı bina: Martı, Simitçi Tablası, Kırmızı Simit Arabası, Mahalle Taş Fırını, Çay Ocağı, Kapalıçarşı Standı, Vapur Büfesi, Nostaljik Tramvay, Galata Simit Kulesi, Boğaziçi Simit Köprüsü, Kız Kulesi Ar-Ge, Yedi Tepe İmparatorluğu
-- Her alınan Martı, simidin kenarına konup gagalayan bir martı ekler
-- 42 yükseltme, 35 başarım, altın simit ve uçan martı olayları
-- İstanbul silüeti (gerçek renkleriyle), süzülen bulutlar, dönen haber bandı
-- Çevrimdışı kazanç yok; ilerleme yalnızca **Kaydet** düğmesine basıldığında tarayıcıda saklanır
+- Mobil uyumlu, klavyeyle oynanabilen yeni arayüz ve vektör İstanbul kıyısı.
+- 12 üretici, tık ve üretim geliştirmeleri, yedi semtlik rota, ödüllü görev zinciri ve başarımlar.
+- İlk martı 12 simit; tık gücü üretimin %3'ünü de kazanır. Yeni semtler kalıcı üretim bonusları açar.
+- 45 saniyelik bereket veren altın simit; hareketi azaltma ve isteğe bağlı hafif ses.
+- Bağımsız 30 saniyelik yarış; arkadaşının skoruyla açılan meydan okuma bağlantıları, paylaşım kartı indirme ve cihazın paylaşım menüsü.
+- 10 saniyede bir ve önemli işlemlerden sonra otomatik kayıt; JSON yedekleme ve geri yükleme.
+- v1/v2 kayıt geçişi. Eski kayıt, üçüncü sürüme ilk geçişte ayrı bir anahtara yedeklenir.
 
-## Yerelde çalıştırma
+Üretim yalnızca oyun sekmesi görünürken sürer. Çevrimdışı kazanç yoktur. Kayıt cihazdaki tarayıcıya aittir; sunucu hesabı, takip kodu veya doğrulanmış çevrimiçi skor tablosu yoktur. Web Locks destekleyen tarayıcılarda ikinci sekme aynı kaydı değiştiremez.
 
-Herhangi bir statik sunucu yeterli:
+## Çalıştırma ve test
+
+Oyun saf HTML, CSS ve JavaScript modüllerinden oluşur. Derleme ve çalışma zamanı bağımlılığı yoktur. ES modülleri için HTTP üzerinden açılmalıdır:
 
 ```sh
-python3 -m http.server 8642
-# http://localhost:8642
+python3 -m http.server 8765 --bind 127.0.0.1
 ```
 
-Saf HTML/CSS/JS — derleme yok, bağımlılık yok.
+[Yerel oyun](http://127.0.0.1:8765/)
+
+```sh
+npm ci
+npm test
+npx playwright install chromium
+# Yerel sunucu başka bir terminalde açıkken:
+npm run test:browser
+```
+
+Var olan Chrome kurulumuyla test için `BROWSER_EXECUTABLE` ortam değişkeni kullanılabilir. `TEST_URL` test edilecek sunucuyu değiştirir. Testler ayrı tarayıcı profilleri kullanır; oyuncu kayıtlarına dokunmaz. Görsel kontrol çıktıları `test-results/` içine yazılır ve depoya alınmaz.
+
+## Dosya düzeni
+
+- `engine.js`: dengeler, üretim, satın alma, görevler, semtler, başarımlar ve kayıt normalleştirme.
+- `game.js`: arayüz, görünür sekme döngüsü, ses ve kullanıcı etkileşimleri.
+- `scene.js`: İstanbul SVG çizimi, simit fotoğrafının hazırlanması ve martılar.
+- `storage.js`: güvenli kayıt/yedek işlemleri.
+- `challenge.js`: bağımsız süreli yarış.
+- `sharing.js`: paylaşım bağlantısı ve yerel paylaşım kartı.
+- `tests/`: oyun motoru ve tarayıcı akışı kontrolleri.
+
+## Yayın
+
+GitHub Pages `main` dalının kökünden yayınlanır. Çalışma zamanı modülleri ve CSS aynı sürüm etiketiyle çağrılır; yeni sürümde etiketleri birlikte artır. `npm` yalnızca geliştirme testleri içindir. Ayrıntılı tasarım kararları [DESIGN.md](DESIGN.md) içinde.

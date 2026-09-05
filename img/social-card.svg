@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f7f3e9"/>
+  <rect x="24" y="24" width="1152" height="582" rx="8" fill="none" stroke="#183f49" stroke-width="2"/>
+  <circle cx="87" cy="86" r="19" fill="none" stroke="#c65332" stroke-width="9"/>
+  <text x="125" y="99" fill="#183f49" font-family="Georgia,serif" font-size="43" font-weight="bold">simit.cafe</text>
+  <text x="65" y="179" fill="#826b51" font-family="Arial,sans-serif" font-size="15" letter-spacing="3">BİR SİMİTLE BAŞLAYAN HİKÂYE</text>
+  <text x="62" y="265" fill="#183f49" font-family="Georgia,serif" font-size="73">İstanbul senin</text>
+  <text x="62" y="344" fill="#c65332" font-family="Georgia,serif" font-size="79" font-style="italic">fırının.</text>
+  <text x="65" y="407" fill="#445b58" font-family="Arial,sans-serif" font-size="23">Simide dokun. Tezgâhını büyüt.</text>
+  <text x="65" y="443" fill="#445b58" font-family="Arial,sans-serif" font-size="23">Yedi semtlik bir İstanbul hikâyesi.</text>
+  <rect x="65" y="499" width="346" height="55" rx="8" fill="#183f49"/>
+  <text x="91" y="534" fill="#f7f3e9" font-family="Arial,sans-serif" font-size="20">30 saniyede kaç simit?  ↗</text>
+  <circle cx="924" cy="277" r="194" fill="#e5e5cf"/>
+  <g transform="translate(720 77)">
+    <circle cx="195" cy="195" r="126" fill="none" stroke="#b97734" stroke-width="73"/>
+    <circle cx="195" cy="195" r="127" fill="none" stroke="#d79b4d" stroke-width="60" stroke-dasharray="17 6"/>
+    <circle cx="195" cy="195" r="118" fill="none" stroke="#f5d493" stroke-width="7" stroke-dasharray="3 15"/>
+    <circle cx="195" cy="195" r="139" fill="none" stroke="#f3d594" stroke-width="8" stroke-dasharray="3 11"/>
+  </g>
+  <path d="M683 509h34v-55l17-12 17 12v55h15v-92l14-28 14 28v92h20v-41q30-44 60 0v41h22v-71h7v71h26v-53h10v53h98v-53h10v53h55" fill="#bbc6b9" stroke="#69887e" stroke-width="2"/>
+  <path d="M947 458q55 55 111 0M943 494h120" fill="none" stroke="#365f63" stroke-width="3"/>
+  <path d="M689 523h460m-427 12h123m27 0h132m18 0h49" stroke="#8bb3b2" stroke-width="3"/>
+  <text x="727" y="573" fill="#183f49" font-family="Arial,sans-serif" font-size="16" letter-spacing="2">ÜCRETSİZ. HESAPSIZ. SICAK SICAK.</text>
+</svg>

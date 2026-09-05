@@ -1,72 +1,413 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="tr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SimitClicker — İstanbul</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<div id="game">
-
-  <!-- SOL: Simit paneli -->
-  <section id="left">
-    <div id="sky">
-      <div class="cloud c1"><img src="img/cloud.webp" alt="" draggable="false"></div>
-      <div class="cloud c2"><img src="img/cloud.webp" alt="" draggable="false"></div>
-      <div class="cloud c3"><img src="img/cloud.webp" alt="" draggable="false"></div>
-      <div class="cloud c4"><img src="img/cloud.webp" alt="" draggable="false"></div>
-      <svg id="skyline" viewBox="0 0 600 160" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
-    </div>
-    <div id="counter">
-      <h1 id="simitCount">0 simit</h1>
-      <p id="spsCount">saniyede 0 simit</p>
-    </div>
-    <div id="simitWrap">
-      <div id="simitStage">
-        <img id="bigSimit" src="img/simit.png" alt="Simit — tıkla!" draggable="false">
-        <div id="gullRing"></div>
-        <div id="gullBadge" hidden></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f7f3e9" />
+    <meta
+      name="description"
+      content="Bir simitle başla, İstanbul'u uyandır. Simit pişir, dükkânını büyüt, yedi semti keşfet. 30 saniyelik simit yarışında arkadaşlarına meydan oku!"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="tr_TR" />
+    <meta property="og:title" content="simit.cafe — İstanbul senin fırının." />
+    <meta
+      property="og:description"
+      content="Bir tık, bir simit. Yedi semtlik bir İstanbul hikâyesi ve arkadaşlarınla 30 saniyelik simit yarışı."
+    />
+    <meta
+      property="og:url"
+      content="https://korayisildak.github.io/simitclicker/"
+    />
+    <meta
+      property="og:image"
+      content="https://korayisildak.github.io/simitclicker/img/social-card.png"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href="https://korayisildak.github.io/simitclicker/" />
+    <link rel="icon" href="img/simit-icon.png" type="image/png" />
+    <link rel="stylesheet" href="style.css?v=3.0.0" />
+    <title>simit.cafe — İstanbul senin fırının.</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#bakeButton">Oyuna geç</a>
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="simit.cafe ana sayfa"
+        ><span class="brand-mark" aria-hidden="true"></span>simit.cafe<span
+          class="brand-subtitle"
+          >İSTANBUL'DAN, SICAK SICAK.</span
+        ></a
+      >
+      <nav class="header-actions" aria-label="Oyun menüsü">
+        <button class="button button-quiet" id="challengeOpen">
+          30 sn yarış</button
+        ><button class="button button-quiet" id="shareOpen">Paylaş ↗</button
+        ><button
+          class="icon-button"
+          id="settingsOpen"
+          aria-label="Ayarlar ve kayıt"
+        >
+          ☷
+        </button>
+      </nav>
+    </header>
+    <main class="app-shell">
+      <div class="intro">
+        <div>
+          <p class="eyebrow">BİR SİMİTLE BAŞLAYAN HİKÂYE</p>
+          <h1>İstanbul senin fırının.</h1>
+          <p>Simide dokun. Tezgâhını büyüt. Şehrin tadını çıkar.</p>
+        </div>
+        <span class="edition-badge">Yedi semt.<br />Bir büyük hayal.</span>
       </div>
-    </div>
-    <div id="buffBar"></div>
-    <div id="ticker"><span id="tickerText"></span></div>
-  </section>
-
-  <!-- ORTA: istatistik + başarımlar -->
-  <section id="middle">
-    <h2>simit.cafe</h2>
-    <div id="stats">
-      <div class="stat"><span>Toplam pişen simit</span><b id="statTotal">0</b></div>
-      <div class="stat"><span>El emeği tık</span><b id="statClicks">0</b></div>
-      <div class="stat"><span>Tık başına simit</span><b id="statPerClick">1</b></div>
-      <div class="stat"><span>Yakalanan altın simit</span><b id="statGolden">0</b></div>
-    </div>
-    <p class="note">🔥 Fırınlar yalnızca bu sekme açık ve görünürken çalışır. Sekmeyi kapatırsan kaydedilmemiş ilerleme silinir.</p>
-    <h3>Başarımlar <span id="achCount"></span></h3>
-    <div id="achievements"></div>
-    <div id="saveRow">
-      <button id="btnSave">Kaydet</button>
-      <button id="btnWipe">Sıfırla</button>
-    </div>
-  </section>
-
-  <!-- SAĞ: dükkân -->
-  <section id="right">
-    <h2>Dükkân</h2>
-    <div id="upgradeShelf" title="Yükseltmeler"></div>
-    <div id="buyAmount">
-      <span>Adet:</span>
-      <button class="amt sel" data-n="1">1</button>
-      <button class="amt" data-n="10">10</button>
-      <button class="amt" data-n="100">100</button>
-    </div>
-    <div id="store"></div>
-  </section>
-
-</div>
-<div id="toasts"></div>
-<div id="tooltip" hidden></div>
-<script src="game.js"></script>
-</body>
+      <div id="sessionNotice" class="notice" role="status" hidden>
+        Oyun başka bir sekmede açık. İlerlemeni korumak için bu sekme bekliyor.
+        Diğer sekmeyi kapatıp burayı yenileyebilirsin.
+      </div>
+      <div id="challengeInvite" class="notice" hidden>
+        <span id="inviteText"></span
+        ><button class="button button-primary" id="acceptChallenge">
+          Meydan okumayı kabul et
+        </button>
+      </div>
+      <div class="game-layout">
+        <section class="bakery-panel" aria-label="Simit fırının">
+          <div class="scene-topline">
+            <span class="location-pill" id="locationLabel">01 / Karaköy</span
+            ><span id="saveStatus" class="status">Kayıt hazırlanıyor</span>
+          </div>
+          <div class="scoreboard">
+            <p class="eyebrow">TEZGÂHINDA</p>
+            <div id="simitCount" class="score-value">0</div>
+            <span class="score-unit">taze simit</span>
+            <div class="production-row">
+              <span><b id="spsCount">0</b> / saniye</span
+              ><span><b id="clickPower">+1</b> / dokunuş</span>
+            </div>
+          </div>
+          <div class="simit-area">
+            <button
+              id="bakeButton"
+              class="simit-button"
+              aria-label="Simit pişir"
+            >
+              <img
+                id="bigSimit"
+                src="img/simit.png"
+                alt=""
+                draggable="false"
+              /><span id="gullRing" class="gull-ring" aria-hidden="true"></span>
+            </button>
+            <div id="floaters" class="floaters" aria-hidden="true"></div>
+          </div>
+          <p class="tap-hint" id="tapHint">
+            İlk simidin için dokun <span aria-hidden="true">↟</span>
+          </p>
+          <button id="goldenButton" class="golden-button" hidden>
+            ✦ Altın simit! <small>Dokun, bereket gelsin</small>
+          </button>
+          <div id="buffBar" class="buff-bar" role="status" hidden></div>
+          <svg
+            id="skyline"
+            viewBox="0 0 800 250"
+            preserveAspectRatio="xMidYMax meet"
+            aria-hidden="true"
+          ></svg>
+          <div class="scene-footer">
+            <div>
+              <strong id="levelTitle">Karaköy'de ilk sabah</strong
+              ><span id="levelRemaining">Sıradaki semte doğru</span>
+            </div>
+            <progress
+              id="levelProgress"
+              max="1"
+              value="0"
+              aria-label="Sıradaki semte ilerleme"
+            ></progress>
+          </div>
+        </section>
+        <section class="management-panel" aria-label="Tezgâh yönetimi">
+          <div class="quest-card">
+            <div class="quest-heading">
+              <span class="eyebrow">SIRADAKİ KÜÇÜK ADIM</span
+              ><span id="questCount"></span>
+            </div>
+            <h2 id="questTitle">İlk fırın çıkışı</h2>
+            <p id="questDescription">Simide dokunarak başla.</p>
+            <progress
+              id="questProgress"
+              max="1"
+              value="0"
+              aria-label="Görev ilerlemesi"
+            ></progress>
+            <div class="quest-bottom">
+              <span class="quest-reward" id="questReward"></span
+              ><button id="claimQuest" class="button button-primary" disabled>
+                Devam et
+              </button>
+            </div>
+          </div>
+          <div class="tabs" role="tablist" aria-label="Dükkân bölümleri">
+            <button
+              id="shopTab"
+              role="tab"
+              aria-selected="true"
+              aria-controls="shopPanel"
+              tabindex="0"
+            >
+              Dükkân</button
+            ><button
+              id="journeyTab"
+              role="tab"
+              aria-selected="false"
+              aria-controls="journeyPanel"
+              tabindex="-1"
+            >
+              Şehir rotası</button
+            ><button
+              id="collectionTab"
+              role="tab"
+              aria-selected="false"
+              aria-controls="collectionPanel"
+              tabindex="-1"
+            >
+              Koleksiyon
+            </button>
+          </div>
+          <section
+            id="shopPanel"
+            class="tab-panel"
+            role="tabpanel"
+            aria-labelledby="shopTab"
+          >
+            <div class="section-heading">
+              <div>
+                <h2>İşler büyüsün.</h2>
+                <small>Ekibin senin için simit üretir.</small>
+              </div>
+              <div
+                class="quantity-control"
+                role="group"
+                aria-label="Satın alınacak adet"
+              >
+                <button data-quantity="1" aria-pressed="true">1</button
+                ><button data-quantity="10" aria-pressed="false">10</button
+                ><button data-quantity="max" aria-pressed="false">Maks.</button>
+              </div>
+            </div>
+            <div id="store"></div>
+            <div class="section-heading">
+              <div>
+                <h2>Ustanın dokunuşu</h2>
+                <small>Tarifleri geliştir, daha çok üret.</small>
+              </div>
+            </div>
+            <div id="upgradeShelf"></div>
+            <p id="upgradeEmpty" class="empty-state">
+              İlk ekibini kurduğunda yeni tarifler burada açılacak.
+            </p>
+          </section>
+          <section
+            id="journeyPanel"
+            class="tab-panel"
+            role="tabpanel"
+            aria-labelledby="journeyTab"
+            hidden
+          >
+            <div class="section-heading">
+              <div>
+                <h2>Yedi durak, bir İstanbul.</h2>
+                <small>Toplam üretimin arttıkça yeni semtlere ulaşırsın.</small>
+              </div>
+            </div>
+            <div id="districts"></div>
+            <p class="panel-note">
+              Her yeni semt kalıcı bir üretim bonusu getirir. Harcadığın
+              simitler rota ilerlemeni azaltmaz.
+            </p>
+          </section>
+          <section
+            id="collectionPanel"
+            class="tab-panel"
+            role="tabpanel"
+            aria-labelledby="collectionTab"
+            hidden
+          >
+            <div class="section-heading">
+              <div>
+                <h2>Emeğinin hikâyesi</h2>
+                <small id="achievementCount">Keşfedilecek başarımlar</small>
+              </div>
+            </div>
+            <div class="stats-grid">
+              <div class="stat-card">
+                <small>Toplam pişen</small><strong id="statTotal">0</strong>
+              </div>
+              <div class="stat-card">
+                <small>El emeği dokunuş</small
+                ><strong id="statClicks">0</strong>
+              </div>
+              <div class="stat-card">
+                <small>Ekibindeki üreticiler</small
+                ><strong id="statBuildings">0</strong>
+              </div>
+              <div class="stat-card">
+                <small>Altın simit</small><strong id="statGolden">0</strong>
+              </div>
+            </div>
+            <div id="achievements"></div>
+          </section>
+        </section>
+      </div>
+      <section class="route-strip" aria-label="İstanbul yolculuğun">
+        <div class="route-heading">
+          <span class="eyebrow">İSTANBUL ROTASI</span
+          ><span id="routeCount">1 / 7 semt</span>
+        </div>
+        <div id="routeStops" class="route-stops"></div>
+      </section>
+      <aside class="news-strip" aria-label="Hayalî İstanbul haberleri">
+        <span>MAHALLE POSTASI</span>
+        <p id="tickerText">
+          Karaköy'de bir fırın açıldı. İlk müşterisi bir martı.
+        </p>
+      </aside>
+      <footer class="page-footer">
+        <span>İstanbul'da her güzel şey bir simitle başlar.</span
+        ><span
+          >Ücretsiz · Hesap gerekmez · İlerleme bu tarayıcıda saklanır</span
+        >
+      </footer>
+    </main>
+    <dialog
+      id="settingsDialog"
+      class="settings-dialog"
+      aria-labelledby="settingsTitle"
+    >
+      <div class="dialog-header">
+        <h2 id="settingsTitle">Fırının ayarları</h2>
+        <button class="close-dialog icon-button" aria-label="Ayarları kapat">
+          ×
+        </button>
+      </div>
+      <p>
+        İlerleme 10 saniyede bir otomatik kaydedilir. Üretim yalnızca bu sekme
+        görünürken devam eder; çevrimdışı kazanç yoktur.
+      </p>
+      <div class="setting-row">
+        <label for="motionSetting">Hafif hareketler</label
+        ><input type="checkbox" id="motionSetting" checked />
+      </div>
+      <div class="setting-row">
+        <label for="soundSetting">Dokunuş sesi</label
+        ><input type="checkbox" id="soundSetting" />
+      </div>
+      <div class="dialog-actions">
+        <button class="button button-primary" id="saveNow">Şimdi kaydet</button
+        ><button class="button" id="exportSave">Yedeği indir</button
+        ><button class="button" id="importSave">Yedeği yükle</button
+        ><input
+          type="file"
+          id="saveFile"
+          accept="application/json,.json"
+          hidden
+        />
+      </div>
+      <p class="panel-note" id="storageDetail">
+        Kayıtlar cihazlar arasında otomatik eşitlenmez. Başka cihaza geçerken
+        yedek dosyanı kullanabilirsin.
+      </p>
+      <details class="danger-zone">
+        <summary>İlerlemeyi sıfırla</summary>
+        <p>
+          Bu tarayıcıdaki fırının sıfırlanır. Önce bir yedek indirmeni öneririz.
+        </p>
+        <button class="button" id="resetGame">Tüm ilerlemeyi sıfırla</button>
+      </details>
+    </dialog>
+    <dialog id="shareDialog" class="share-dialog" aria-labelledby="shareTitle">
+      <div class="dialog-header">
+        <h2 id="shareTitle">Bir simit de arkadaşına.</h2>
+        <button class="close-dialog icon-button" aria-label="Paylaşımı kapat">
+          ×
+        </button>
+      </div>
+      <div id="shareCard" class="share-card">
+        <span class="eyebrow">SİMİT.CAFE / İSTANBUL</span>
+        <div class="share-number" id="shareNumber">0</div>
+        <h3 id="shareLabel">simitlik bir hikâye.</h3>
+        <p id="shareDetail"></p>
+        <span class="share-signature">Sıra sende. Bir simitle başla. ↗</span>
+      </div>
+      <div class="dialog-actions">
+        <button class="button button-primary" id="nativeShare">
+          Arkadaşına gönder ↗</button
+        ><button class="button" id="copyShare">Bağlantıyı kopyala</button
+        ><button class="button" id="downloadCard">Kartı indir</button>
+      </div>
+      <p class="panel-note" id="shareFeedback" role="status">
+        Paylaşım önizlemesi. Sen göndermeden hiçbir şey paylaşılmaz.
+      </p>
+    </dialog>
+    <dialog
+      id="challengeDialog"
+      class="challenge-dialog"
+      aria-labelledby="challengeTitle"
+    >
+      <div class="dialog-header">
+        <h2 id="challengeTitle">30 saniye. Kaç simit?</h2>
+        <button class="close-dialog icon-button" aria-label="Yarışı kapat">
+          ×
+        </button>
+      </div>
+      <p id="challengeDescription">
+        Herkes eşit başlar: bir dokunuş, bir simit. Dükkân bonusları bu yarışa
+        katılmaz.
+      </p>
+      <div class="challenge-metrics">
+        <div>
+          <small>KALAN SÜRE</small><strong id="challengeTime">30,0</strong>
+        </div>
+        <div><small>SİMİT</small><strong id="challengeScore">0</strong></div>
+      </div>
+      <button
+        id="challengeBake"
+        class="challenge-bake"
+        aria-label="Yarışta bir simit pişir"
+        disabled
+      >
+        <img src="img/simit.png" alt="" draggable="false" />
+      </button>
+      <p id="challengeResult" role="status">Hazırsan fırını yak.</p>
+      <div class="dialog-actions">
+        <button id="challengeStart" class="button button-primary">
+          Yarışı başlat</button
+        ><button id="challengeShare" class="button" hidden>
+          Skorunla meydan oku ↗
+        </button>
+      </div>
+      <p class="panel-note">
+        Skorlar arkadaşlar arası eğlence içindir; doğrulanmış bir sıralama
+        değildir.
+      </p>
+    </dialog>
+    <nav class="mobile-nav" aria-label="Hızlı oyun gezinmesi">
+      <button id="jumpBakery">Fırına dön ↑</button
+      ><span id="mobileBalance">0 simit</span
+      ><button id="jumpShop">Dükkâna git ↓</button>
+    </nav>
+    <div
+      id="toasts"
+      class="toast-container"
+      aria-live="polite"
+      aria-atomic="false"
+    ></div>
+    <div id="announcement" class="sr-only" role="status"></div>
+    <noscript
+      ><div class="notice">
+        Fırını açmak için tarayıcında JavaScript'i etkinleştirmen gerekiyor.
+      </div></noscript
+    >
+    <script type="module" src="game.js?v=3.0.0"></script>
+  </body>
 </html>

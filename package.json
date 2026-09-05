@@ -1,0 +1,16 @@
+{
+  "name": "simit-cafe",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "description": "İstanbul temalı, bağımlılıksız artımlı tarayıcı oyunu",
+  "scripts": {
+    "test": "node --test tests/engine.test.js tests/storage.test.js",
+    "test:browser": "node tests/browser.test.js",
+    "serve": "python3 -m http.server 8765 --bind 127.0.0.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.0",
+    "prettier": "^3.9.6"
+  }
+}
