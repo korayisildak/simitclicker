@@ -1,5 +1,13 @@
 # SimitClicker v3 — inceleme ve tasarım kararları
 
+## 3.1 — oyun ekranı ve envanter
+
+Oyuncu geri bildirimi üzerine kâğıt renkli, web sayfasını andıran 3.0 sunumu değiştirildi. Oyun penceresine sığan koyu FRP çerçeveleri, pirinç renkli seçim vurguları ve eşya yuvaları kullanılıyor. Masaüstünde sahne ve envanter yan yana; telefonda aynı ekranın üst ve alt bölümlerinde. Eşya listesi kendi içinde kayarken simit ve satın alma paneli yerinde kalıyor. Çok kısa, dar ekranlarda erişim için sayfa kaydırma yedeği var.
+
+Bir yuvaya dokunmak yalnızca eşyayı seçer. Açıklama, üretim etkisi, fiyat ve eksik bakiye sabit inceleme panelinde gösterilir; satın alma ayrı düğmededir. Kilitli eşyalar incelenebilir ve açılma koşullarını gösterir. Öğrenilen tarifler yeşil işaretle envanterde kalır. Ekonomi ve mevcut kayıtlar korunur.
+
+Tam ekran düğmesi tarayıcı desteğini denetler. Müzik düğmesi özgün, düşük ses seviyeli 8-bit döngüyü açık bir kullanıcı hareketiyle başlatır; tercih kaydedilse bile sayfa yeniden açılınca kendiliğinden ses çalmaz. Sekme gizlenince müzik durur. Masaüstündeki iki piksel imleç yerel SVG'dir; oyun ayarından sistem imlecine dönülebilir.
+
 ## Mevcut oyunda görülen sorunlar
 
 İnceleme, `a97d80a` sürümünün kaynak koduna ve önceki ekran görüntülerine dayanır. Gerçek oyuncu analitiği veya kullanıcı araştırması yapılmamıştır.

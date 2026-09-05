@@ -1,4 +1,4 @@
-import { downloadBlob } from "./storage.js?v=3.0.0";
+import { downloadBlob } from "./storage.js?v=3.1.0";
 
 export const GAME_URL = "https://korayisildak.github.io/simitclicker/";
 const $ = (id) => document.getElementById(id);

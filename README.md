@@ -6,7 +6,9 @@
 
 ## Üçüncü sürüm
 
-- Mobil uyumlu, klavyeyle oynanabilen yeni arayüz ve vektör İstanbul kıyısı.
+- 3.1: Eski FRP oyunlarından ilham alan, pencereye sığan kompakt oyun sahnesi ve yuvalı envanter. Eşyayı seç, etkisini incele, sabit panelden satın al; öğrenilen tarifler envanterde kalır.
+- Mobil/yatay ekran uyumu, klavyeyle oynama ve vektör İstanbul kıyısı.
+- Tam ekran düğmesi, açılıp kapanan özgün 8-bit müzik ve ayarlardan kapatılabilen piksel RPG imleçleri. Müzik yalnızca açıkça başlatılınca çalar; sekme gizlenince durur.
 - 12 üretici, tık ve üretim geliştirmeleri, yedi semtlik rota, ödüllü görev zinciri ve başarımlar.
 - İlk martı 12 simit; tık gücü üretimin %3'ünü de kazanır. Yeni semtler kalıcı üretim bonusları açar.
 - 45 saniyelik bereket veren altın simit; hareketi azaltma ve isteğe bağlı hafif ses.
@@ -40,6 +42,7 @@ Var olan Chrome kurulumuyla test için `BROWSER_EXECUTABLE` ortam değişkeni ku
 
 - `engine.js`: dengeler, üretim, satın alma, görevler, semtler, başarımlar ve kayıt normalleştirme.
 - `game.js`: arayüz, görünür sekme döngüsü, ses ve kullanıcı etkileşimleri.
+- `music.js`: dış dosya kullanmayan, Web Audio ile üretilen özgün chiptune döngüsü.
 - `scene.js`: İstanbul SVG çizimi, simit fotoğrafının hazırlanması ve martılar.
 - `storage.js`: güvenli kayıt/yedek işlemleri.
 - `challenge.js`: bağımsız süreli yarış.

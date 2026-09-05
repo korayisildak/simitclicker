@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" shape-rendering="crispEdges">
+  <title>Altın kenarlı piksel ok</title>
+  <path fill="#000" fill-opacity=".35" transform="translate(1 1)" d="M2 2h3v2h2v2h2v2h2v2h2v2h2v2h2v2h2v2h2v3h-8v2h2v4h2v3h-6v-2H9v-4H7v-2H5v2H2Z"/>
+  <path fill="#231b22" d="M2 2h3v2h2v2h2v2h2v2h2v2h2v2h2v2h2v2h2v3h-8v2h2v4h2v3h-6v-2H9v-4H7v-2H5v2H2Z"/>
+  <path fill="#bb873d" d="M4 5h1v2h2v2h2v2h2v2h2v2h2v2h2v2h2v1h-8v4h2v4h2v1h-3v-2h-2v-4H8v-4H6v2H4Z"/>
+  <path fill="#fff1cb" d="M4 5h1v2h2v2h2v2h2v2h2v2h2v2H8v1H6v2H4Z"/>
+  <path fill="#ffe1a1" d="M9 19h1v4h2v4h1v1h-1v-2h-2v-4H9Z"/>
+</svg>

@@ -13,7 +13,7 @@ await mkdir("test-results", { recursive: true });
 const errors = [];
 async function open(options = {}) {
   const context = await browser.newContext({
-    viewport: options.viewport || { width: 1440, height: 1050 },
+    viewport: options.viewport || { width: 1440, height: 900 },
     reducedMotion: options.reducedMotion || "reduce",
   });
   if (options.save)
@@ -35,16 +35,133 @@ async function open(options = {}) {
 const key = "simitclicker-istanbul";
 const read = (page) =>
   page.evaluate((k) => JSON.parse(localStorage.getItem(k)), key);
+
+async function assertCompactViewport(page, { width, height }) {
+  const size = `${width}×${height}`;
+  const overflow = await page.evaluate(() => ({
+    horizontal: document.documentElement.scrollWidth > innerWidth,
+    vertical: document.documentElement.scrollHeight > innerHeight,
+  }));
+  assert.deepEqual(
+    overflow,
+    { horizontal: false, vertical: false },
+    `The game fits the viewport at ${size}`,
+  );
+  const inventoryHeight = await page
+    .locator(".inventory-scroll")
+    .evaluate((el) => el.clientHeight);
+  assert.ok(inventoryHeight >= 100, `Inventory tiles remain usable at ${size}`);
+  for (const selector of ["#bakeButton", "#buySelected"]) {
+    const box = await page.locator(selector).boundingBox();
+    assert.ok(
+      box &&
+        box.x >= 0 &&
+        box.y >= 0 &&
+        box.x + box.width <= width + 1 &&
+        box.y + box.height <= height + 1,
+      `${selector} stays fully in the viewport at ${size}`,
+    );
+  }
+}
+
 try {
   const { page, context } = await open();
   assert.equal(await page.locator("#simitCount").textContent(), "0");
+  assert.equal(await page.locator("[data-building]:visible").count(), 12);
+  assert.equal(await page.locator("#buySelected").isDisabled(), true);
   assert.equal(
     await page.locator('[data-building="marti"]').isDisabled(),
-    true,
+    false,
+    "Unaffordable items can still be inspected",
   );
+  const initialCurrency = (await read(page)).simit;
+  await page.locator('[data-building="tabla"]').click();
+  assert.equal(
+    await page.locator("#selectedName").textContent(),
+    "Simitçi Tablası",
+  );
+  assert.equal((await read(page)).simit, initialCurrency);
+  const lockedItem = page.locator('[data-building="tepe"]');
+  assert.match(await lockedItem.getAttribute("class"), /is-locked/);
+  await lockedItem.click();
+  assert.equal(
+    await page.locator("#selectedName").textContent(),
+    "Yedi Tepe İmparatorluğu",
+  );
+  assert.equal(await page.locator("#buySelected").isDisabled(), true);
+  assert.match(
+    await page.locator("#selectedRequirement").textContent(),
+    /Önce/,
+  );
+  assert.equal((await read(page)).simit, initialCurrency);
+  await page.locator('[data-building="marti"]').click();
+  assert.equal(await page.locator("#selectedName").textContent(), "Martı");
+
+  // Saved music preferences never bypass the explicit music-button gesture.
+  assert.equal(
+    await page.locator("#musicToggle").getAttribute("data-playing"),
+    "false",
+  );
+  assert.equal((await read(page)).settings.music, false);
+  await page.locator("#musicToggle").click();
+  await page.waitForFunction(
+    () => document.querySelector("#musicToggle").dataset.playing === "true",
+  );
+  assert.equal((await read(page)).settings.music, true);
+  await page.reload();
+  await page.locator('[data-building="marti"]').waitFor();
+  assert.equal(
+    await page.locator("#musicToggle").getAttribute("aria-pressed"),
+    "true",
+  );
+  assert.equal(
+    await page.locator("#musicToggle").getAttribute("data-playing"),
+    "false",
+  );
+  await page.locator("#musicToggle").click();
+  await page.waitForFunction(
+    () => document.querySelector("#musicToggle").dataset.playing === "true",
+  );
+  await page.locator("#musicToggle").click();
+  await page.waitForFunction(
+    () => document.querySelector("#musicToggle").dataset.playing === "false",
+  );
+  assert.equal((await read(page)).settings.music, false);
+
+  const fullscreenSupported = await page.evaluate(() =>
+    Boolean(
+      document.fullscreenEnabled && document.documentElement.requestFullscreen,
+    ),
+  );
+  await page.locator("#fullscreenToggle").click();
+  if (fullscreenSupported) {
+    await page.waitForFunction(() => Boolean(document.fullscreenElement));
+    assert.equal(
+      await page.locator("#fullscreenToggle").getAttribute("aria-pressed"),
+      "true",
+    );
+    await page.locator("#fullscreenToggle").click();
+    await page.waitForFunction(() => !document.fullscreenElement);
+  } else {
+    await page
+      .getByText("Bu tarayıcı tam ekran geçişine izin vermiyor.", {
+        exact: false,
+      })
+      .waitFor();
+  }
+  assert.equal(
+    await page.locator("#fullscreenToggle").getAttribute("aria-pressed"),
+    "false",
+  );
+  await assertCompactViewport(page, { width: 1440, height: 900 });
   await page.screenshot({ path: "test-results/desktop.png", fullPage: true });
   await page.locator("#bakeButton").click({ clickCount: 12, delay: 35 });
+  const currencyBeforeInspect = (await read(page)).simit;
   await page.locator('[data-building="marti"]').click();
+  assert.equal((await read(page)).owned.marti, 0);
+  assert.equal((await read(page)).simit, currencyBeforeInspect);
+  assert.equal(await page.locator("#buySelected").isDisabled(), false);
+  await page.locator("#buySelected").click();
   assert.equal((await read(page)).owned.marti, 1);
   assert.ok((await page.locator("#spsCount").textContent()) !== "0");
   assert.equal(await page.locator("#claimQuest").isDisabled(), false);
@@ -77,7 +194,28 @@ try {
   await page.locator("#settingsOpen").click();
   await page.locator("#soundSetting").check();
   await page.locator("#motionSetting").uncheck();
-  assert.deepEqual((await read(page)).settings, { motion: false, sound: true });
+  assert.deepEqual((await read(page)).settings, {
+    motion: false,
+    sound: true,
+    music: false,
+    cursor: true,
+  });
+  await page.locator("#cursorSetting").uncheck();
+  assert.equal(
+    await page
+      .locator("body")
+      .evaluate((el) => el.classList.contains("native-cursor")),
+    true,
+  );
+  assert.equal((await read(page)).settings.cursor, false);
+  await page.locator("#cursorSetting").check();
+  assert.equal(
+    await page
+      .locator("body")
+      .evaluate((el) => el.classList.contains("native-cursor")),
+    false,
+  );
+  assert.equal((await read(page)).settings.cursor, true);
   const downloadPromise = page.waitForEvent("download");
   await page.locator("#exportSave").click();
   const download = await downloadPromise;
@@ -147,23 +285,51 @@ try {
       key,
     ),
   );
+  const recipeCurrency = (await read(migrated.page)).simit;
+  await migrated.page.locator('[data-upgrade="tabla_u0"]').click();
+  assert.equal(
+    await migrated.page.locator("#selectedName").textContent(),
+    "Dengeli Tabla",
+  );
+  assert.equal((await read(migrated.page)).simit, recipeCurrency);
+  assert.equal((await read(migrated.page)).upgrades.tabla_u0, undefined);
+  await migrated.page.locator("#buySelected").click();
+  assert.equal((await read(migrated.page)).upgrades.tabla_u0, true);
+  assert.equal(
+    await migrated.page.locator('[data-upgrade="tabla_u0"]').isVisible(),
+    true,
+  );
+  assert.match(
+    await migrated.page
+      .locator('[data-upgrade="tabla_u0"]')
+      .getAttribute("class"),
+    /is-learned/,
+  );
+  assert.equal(await migrated.page.locator("#buySelected").isDisabled(), true);
   await migrated.page.locator('[data-quantity="max"]').click();
   await migrated.page.locator('[data-building="marti"]').click();
+  await migrated.page.locator("#buySelected").click();
   assert.ok((await read(migrated.page)).owned.marti > 8);
   assert.ok((await read(migrated.page)).simit >= 0);
   await migrated.context.close();
 
-  for (const width of [390, 768]) {
-    const mobile = await open({ viewport: { width, height: 844 } });
-    assert.equal(
-      await mobile.page.evaluate(
-        () => document.documentElement.scrollWidth <= innerWidth,
-      ),
-      true,
-      `No horizontal overflow at ${width}px`,
-    );
+  const viewports = [
+    { width: 360, height: 640 },
+    { width: 375, height: 667 },
+    { width: 390, height: 844 },
+    { width: 768, height: 844 },
+    { width: 1440, height: 900 },
+    { width: 844, height: 390 },
+  ];
+  for (const viewport of viewports) {
+    const { width, height } = viewport;
+    const mobile = await open({ viewport });
+    await assertCompactViewport(mobile.page, viewport);
     await mobile.page.screenshot({
-      path: `test-results/mobile-${width}.png`,
+      path:
+        width === 1440
+          ? "test-results/desktop.png"
+          : `test-results/mobile-${width}${height === 390 ? "-landscape" : ""}.png`,
       fullPage: true,
     });
     await mobile.page
@@ -174,14 +340,59 @@ try {
       await mobile.page.locator("#simitCount").textContent(),
       "0",
     );
-    await mobile.page.locator("#jumpShop").click();
-    assert.equal(
-      await mobile.page.locator("#shopTab").getAttribute("aria-selected"),
-      "true",
-    );
-    assert.ok((await mobile.page.locator("#shopTab").boundingBox()).y < 100);
     await mobile.context.close();
   }
+
+  // A developed inventory scrolls internally while the purchase area stays fixed.
+  const developed = await open({
+    save: {
+      v: 3,
+      simit: 1e12,
+      total: 1e12,
+      owned: Object.fromEntries(
+        [
+          "marti",
+          "tabla",
+          "araba",
+          "firin",
+          "cay",
+          "carsi",
+          "vapur",
+          "tramvay",
+          "galata",
+          "kopru",
+          "kiz",
+          "tepe",
+        ].map((id) => [id, 25]),
+      ),
+    },
+  });
+  for (const viewport of viewports) {
+    await developed.page.setViewportSize(viewport);
+    const before = await developed.page.locator("#buySelected").boundingBox();
+    const scroll = await developed.page
+      .locator(".inventory-scroll")
+      .evaluate((el) => {
+        el.scrollTop = el.scrollHeight;
+        return {
+          top: el.scrollTop,
+          height: el.clientHeight,
+          content: el.scrollHeight,
+        };
+      });
+    assert.ok(
+      scroll.content > scroll.height && scroll.top > 0,
+      `The inventory itself scrolls at ${viewport.width}×${viewport.height}`,
+    );
+    const after = await developed.page.locator("#buySelected").boundingBox();
+    assert.equal(
+      after.y,
+      before.y,
+      "Purchasing stays fixed while the inventory scrolls",
+    );
+    await assertCompactViewport(developed.page, viewport);
+  }
+  await developed.context.close();
   const invite = await open();
   await invite.page.goto(`${baseURL}#race=72`);
   await invite.page.reload();
@@ -190,7 +401,7 @@ try {
   await invite.context.close();
   assert.deepEqual(errors, [], "No browser errors");
   console.log(
-    "Browser checks passed: purchasing, quests, save/reload, migration, multi-tab, keyboard, settings, export, sharing, timed challenge, mobile layouts.",
+    "Browser checks passed: inventory inspection/purchasing, locked slots, recipes, quests, save/reload, migration, multi-tab, keyboard, settings, music, cursor, fullscreen, export, sharing, timed challenge, compact desktop/mobile/landscape layouts and internal scrolling.",
   );
 } finally {
   await browser.close();

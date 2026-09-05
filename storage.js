@@ -1,4 +1,4 @@
-import { createState, normalizeSave } from "./engine.js?v=3.0.0";
+import { createState, normalizeSave } from "./engine.js?v=3.1.0";
 
 export const SAVE_KEY = "simitclicker-istanbul";
 let canWrite = true;

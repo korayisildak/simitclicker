@@ -14,13 +14,13 @@ import {
   claimQuest,
   currentQuest,
   collectGolden,
-} from "./engine.js?v=3.0.0";
+} from "./engine.js?v=3.1.0";
 import {
   mountScene,
   updateScene,
   prepareSimit,
   updateGulls,
-} from "./scene.js?v=3.0.0";
+} from "./scene.js?v=3.1.0";
 import {
   SAVE_KEY,
   readSave,
@@ -29,9 +29,10 @@ import {
   replaceSave,
   clearSave,
   downloadBlob,
-} from "./storage.js?v=3.0.0";
-import { initSharing, openShare } from "./sharing.js?v=3.0.0";
-import { initChallenge } from "./challenge.js?v=3.0.0";
+} from "./storage.js?v=3.1.0";
+import { initSharing, openShare } from "./sharing.js?v=3.1.0";
+import { initChallenge } from "./challenge.js?v=3.1.0";
+import { createMusicController } from "./music.js?v=3.1.0";
 
 const $ = (id) => document.getElementById(id);
 const dom = Object.fromEntries(
@@ -59,6 +60,9 @@ let nextGolden = 45,
   lastGulls = -1,
   previousTitle = "";
 let audioContext;
+let musicController;
+let selectedItem = { type: "building", id: "marti" };
+let selectedArtKey = "";
 const buildingNodes = new Map(),
   upgradeNodes = new Map(),
   achievementNodes = new Map();
@@ -130,19 +134,20 @@ function artwork(item, className) {
 }
 
 function buildInterface() {
-  for (const item of BUILDINGS) {
+  for (const [index, item] of BUILDINGS.entries()) {
     const button = document.createElement("button");
     button.className = "building-card";
     button.dataset.building = item.id;
     button.innerHTML = `<span class="item-copy"><strong>${item.name}</strong><span class="item-description">${item.desc}</span><span class="item-rate"></span></span><span class="item-buy"><span class="price"></span><span class="owned"></span></span>`;
     button.prepend(artwork(item, "item-art"));
+    const slotIndex = document.createElement("span");
+    slotIndex.className = "slot-index";
+    slotIndex.setAttribute("aria-hidden", "true");
+    slotIndex.textContent = String(index + 1).padStart(2, "0");
+    button.append(slotIndex);
     button.addEventListener("click", () => {
-      if (readOnly) return;
-      const result = buyBuilding(state, item.id, quantity);
-      feedback(
-        result,
-        result.ok ? `${result.count} ${item.name} ekibine katıldı.` : null,
-      );
+      selectedItem = { type: "building", id: item.id };
+      render(true);
     });
     buildingNodes.set(item.id, {
       button,
@@ -159,8 +164,8 @@ function buildInterface() {
     button.innerHTML = `<span class="upgrade-copy"><strong>${item.name}</strong><small>${item.desc}</small></span><span class="price">${fmt(item.cost)} simit</span>`;
     button.prepend(artwork(item, "upgrade-icon"));
     button.addEventListener("click", () => {
-      if (!readOnly)
-        feedback(buyUpgrade(state, item.id), `${item.name} artık senin.`);
+      selectedItem = { type: "upgrade", id: item.id };
+      render(true);
     });
     upgradeNodes.set(item.id, button);
     dom.upgradeShelf.append(button);
@@ -195,7 +200,6 @@ function buildInterface() {
 function render(full = false) {
   const rates = derive(state);
   text("simitCount", fmt(Math.floor(state.simit)));
-  text("mobileBalance", `${fmt(Math.floor(state.simit))} simit`);
   text("spsCount", fmt(rates.sps));
   text("clickPower", `+${fmt(rates.clickPower)}`);
   const quest = currentQuest(state);
@@ -257,6 +261,14 @@ function render(full = false) {
   if (lastSceneLevel !== rates.districtIndex) {
     updateScene(dom.skyline, rates.districtIndex);
     lastSceneLevel = rates.districtIndex;
+    text(
+      "levelBadge",
+      ["I", "II", "III", "IV", "V", "VI", "VII"][rates.districtIndex],
+    );
+    dom.levelBadge.setAttribute(
+      "aria-label",
+      `Seviye ${rates.districtIndex + 1}`,
+    );
     text("routeCount", `${rates.districtIndex + 1} / ${DISTRICTS.length} semt`);
     DISTRICTS.forEach((district, i) => {
       for (const el of [
@@ -283,40 +295,64 @@ function render(full = false) {
   if (!full) return;
   BUILDINGS.forEach((item, i) => {
     const node = buildingNodes.get(item.id);
-    node.button.hidden =
-      i > 1 &&
-      !state.owned[item.id] &&
-      !state.owned[BUILDINGS[i - 1].id] &&
-      state.total < item.cost * 0.35;
+    const known = buildingKnown(item);
     const count =
       quantity === "max" ? affordableCount(state, item.id) : quantity;
     const cost = priceFor(state, item.id, quantity);
-    node.button.disabled =
-      readOnly || !count || !Number.isFinite(cost) || state.simit < cost;
+    node.button.classList.toggle("is-locked", !known);
+    node.button.classList.toggle(
+      "is-affordable",
+      known &&
+        !readOnly &&
+        count > 0 &&
+        Number.isFinite(cost) &&
+        state.simit >= cost,
+    );
+    const selected =
+      selectedItem.type === "building" && selectedItem.id === item.id;
+    node.button.classList.toggle("is-selected", selected);
+    node.button.setAttribute("aria-pressed", String(selected));
     const displayCost = Number.isFinite(cost)
       ? cost
       : priceFor(state, item.id, 1);
-    node.price.textContent = `${fmt(displayCost)} simit`;
-    node.owned.textContent = `${state.owned[item.id]} adet · +${count || 1} al`;
+    node.price.textContent = known ? `${fmt(displayCost)} simit` : "Kilitli";
+    node.owned.textContent = String(state.owned[item.id]);
     node.rate.textContent = `Tanesi +${fmt(rates.buildingSps[item.id])} / sn`;
     node.button.setAttribute(
       "aria-label",
-      `${item.name}, ${count || 1} adet al, ${fmt(displayCost)} simit. Sende ${state.owned[item.id]} adet var.`,
+      `${item.name} — incele. ${known ? `${fmt(displayCost)} simit` : "Henüz açılmadı"}. Sende ${state.owned[item.id]} adet var.`,
     );
   });
   let visibleUpgrades = 0;
   for (const item of UPGRADES) {
     const button = upgradeNodes.get(item.id);
-    const visible =
-      !state.upgrades[item.id] &&
-      (item.type === "building"
-        ? state.owned[item.target] >= item.needCount
-        : state.total >= item.cost / 2);
+    const learned = !!state.upgrades[item.id];
+    const visible = learned || upgradeKnown(item);
     button.hidden = !visible;
-    button.disabled = readOnly || state.simit < item.cost;
+    button.classList.toggle(
+      "is-affordable",
+      !learned && !readOnly && state.simit >= item.cost,
+    );
+    button.classList.toggle("is-learned", learned);
+    button.querySelector(".price").textContent = learned
+      ? "✓ Öğrenildi"
+      : `${fmt(item.cost)} simit`;
+    const selected =
+      selectedItem.type === "upgrade" && selectedItem.id === item.id;
+    button.classList.toggle("is-selected", selected);
+    button.setAttribute("aria-pressed", String(selected));
+    button.setAttribute(
+      "aria-label",
+      `${item.name} tarifini incele. ${learned ? "Öğrenildi" : `${fmt(item.cost)} simit`}.`,
+    );
     if (visible) visibleUpgrades++;
   }
   dom.upgradeEmpty.hidden = visibleUpgrades > 0;
+  text(
+    "inventoryCount",
+    `${BUILDINGS.filter((item) => state.owned[item.id] > 0).length} / 12 tür`,
+  );
+  renderInspector(rates);
   text("statTotal", fmt(state.total));
   text("statClicks", fmt(state.clicks));
   text("statBuildings", fmt(rates.totalBuildings));
@@ -339,6 +375,112 @@ function render(full = false) {
   }
 }
 
+function buildingKnown(item) {
+  const index = BUILDINGS.indexOf(item);
+  return (
+    index < 2 ||
+    state.owned[item.id] > 0 ||
+    state.owned[BUILDINGS[index - 1].id] > 0 ||
+    state.total >= item.cost * 0.35
+  );
+}
+
+function upgradeKnown(item) {
+  return item.type === "building"
+    ? state.owned[item.target] >= item.needCount
+    : state.total >= item.cost / 2;
+}
+
+function renderInspector(rates) {
+  const isBuilding = selectedItem.type === "building";
+  const item = (isBuilding ? BUILDINGS : UPGRADES).find(
+    (item) => item.id === selectedItem.id,
+  );
+  const known = isBuilding
+    ? buildingKnown(item)
+    : upgradeKnown(item) || state.upgrades[item.id];
+  const purchased = !isBuilding && state.upgrades[item.id];
+  const count = isBuilding
+    ? quantity === "max"
+      ? affordableCount(state, item.id)
+      : quantity
+    : 1;
+  const cost = isBuilding ? priceFor(state, item.id, quantity) : item.cost;
+  const displayCost = Number.isFinite(cost)
+    ? cost
+    : isBuilding
+      ? priceFor(state, item.id, 1)
+      : item.cost;
+  const canBuy =
+    !readOnly &&
+    known &&
+    !purchased &&
+    count > 0 &&
+    Number.isFinite(cost) &&
+    state.simit >= cost;
+  const artKey = `${selectedItem.type}:${item.id}`;
+  if (selectedArtKey !== artKey) {
+    dom.selectedIcon.replaceChildren(artwork(item, "inspector-art"));
+    selectedArtKey = artKey;
+  }
+  text("selectedName", item.name);
+  text(
+    "selectedType",
+    isBuilding
+      ? known
+        ? `ÜRETİCİ · ${state.owned[item.id]} ADET`
+        : "HENÜZ KEŞFEDİLMEDİ"
+      : "TARİF · KALICI GELİŞTİRME",
+  );
+  text("selectedDescription", item.desc);
+  text(
+    "selectedEffect",
+    isBuilding
+      ? `Tanesi +${fmt(rates.buildingSps[item.id])}/sn · Toplam ${fmt(rates.buildingSps[item.id] * state.owned[item.id])}/sn`
+      : purchased
+        ? "✓ Tarif öğrenildi"
+        : item.type === "building"
+          ? `${BUILDINGS.find((building) => building.id === item.target).name} üretimi ×${fmt(item.mult)}`
+          : item.type === "click"
+            ? `Temel dokunuş gücü ×${fmt(item.mult)}`
+            : `Dokunuşa +%${fmt(item.pct * 100)} üretim`,
+  );
+  text(
+    "selectedCost",
+    Number.isFinite(displayCost)
+      ? `${fmt(displayCost)} simit`
+      : "En yüksek adet",
+  );
+  text(
+    "buySelected",
+    purchased
+      ? "Öğrenildi"
+      : !known
+        ? "Kilitli"
+        : isBuilding
+          ? `Satın al ×${count || 1}`
+          : "Tarifi öğren",
+  );
+  dom.buySelected.disabled = !canBuy;
+  dom.buySelected.setAttribute(
+    "aria-label",
+    `${item.name}: ${isBuilding ? `${count || 1} adet satın al` : "tarifi öğren"}`,
+  );
+  let requirement = canBuy
+    ? "Kalıcı üretim gücü"
+    : purchased
+      ? "Envanterine eklendi"
+      : `Eksik: ${fmt(Math.max(0, displayCost - state.simit))} simit`;
+  if (!known && isBuilding) {
+    const previous = BUILDINGS[BUILDINGS.indexOf(item) - 1];
+    requirement = `Önce ${previous.name} edin veya ${fmt(item.cost * 0.35)} toplam simit üret.`;
+  }
+  if (!Number.isFinite(displayCost))
+    requirement = "Bu üreticinin adet sınırına ulaştın.";
+  if (readOnly) requirement = "Oyun diğer sekmede açık.";
+  text("selectedRequirement", requirement);
+}
+
 function motionEnabled() {
   return (
     state.settings.motion &&
@@ -349,6 +491,9 @@ function applySettings() {
   document.body.classList.toggle("reduce-motion", !state.settings.motion);
   dom.motionSetting.checked = state.settings.motion;
   dom.soundSetting.checked = state.settings.sound;
+  dom.cursorSetting.checked = state.settings.cursor;
+  document.body.classList.toggle("native-cursor", !state.settings.cursor);
+  musicController?.setEnabled(Boolean(state.settings.music));
 }
 
 function chime() {
@@ -407,19 +552,53 @@ function selectTab(tab) {
 }
 
 function wireActions() {
-  dom.jumpBakery.addEventListener("click", () =>
-    dom.bakeButton.scrollIntoView({
-      behavior: motionEnabled() ? "smooth" : "instant",
-      block: "center",
-    }),
-  );
-  dom.jumpShop.addEventListener("click", () => {
-    selectTab(dom.shopTab);
-    dom.shopTab.scrollIntoView({
-      behavior: motionEnabled() ? "smooth" : "instant",
-      block: "start",
-    });
+  dom.buySelected.addEventListener("click", () => {
+    if (readOnly || dom.buySelected.disabled) return;
+    if (selectedItem.type === "building") {
+      const item = BUILDINGS.find((item) => item.id === selectedItem.id);
+      const result = buyBuilding(state, item.id, quantity);
+      feedback(
+        result,
+        result.ok ? `${result.count} ${item.name} envanterine eklendi.` : null,
+      );
+    } else {
+      const item = UPGRADES.find((item) => item.id === selectedItem.id);
+      feedback(buyUpgrade(state, item.id), `${item.name} öğrenildi.`);
+    }
   });
+  const fullscreenState = () => {
+    const active = Boolean(
+      document.fullscreenElement || document.webkitFullscreenElement,
+    );
+    dom.fullscreenToggle.setAttribute("aria-pressed", String(active));
+    dom.fullscreenToggle.textContent = active ? "⛶ Küçült" : "⛶ Tam ekran";
+    dom.fullscreenToggle.setAttribute(
+      "aria-label",
+      active ? "Tam ekrandan çık" : "Tam ekranı aç",
+    );
+  };
+  dom.fullscreenToggle.addEventListener("click", async () => {
+    try {
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        const exit = document.exitFullscreen || document.webkitExitFullscreen;
+        await exit.call(document);
+      } else {
+        const request =
+          document.documentElement.requestFullscreen ||
+          document.documentElement.webkitRequestFullscreen;
+        if (!request) throw new Error("Fullscreen unavailable");
+        await request.call(document.documentElement);
+      }
+      fullscreenState();
+    } catch {
+      toast(
+        "Bu tarayıcı tam ekran geçişine izin vermiyor. Oyun pencerenin tamamında oynanabilir.",
+      );
+    }
+  });
+  document.addEventListener("fullscreenchange", fullscreenState);
+  document.addEventListener("webkitfullscreenchange", fullscreenState);
+  fullscreenState();
   dom.bakeButton.addEventListener("click", bake);
   dom.bakeButton.addEventListener("keydown", (e) => {
     if (e.repeat && [" ", "Enter"].includes(e.key)) e.preventDefault();
@@ -489,6 +668,7 @@ function wireActions() {
   for (const [id, key] of [
     ["motionSetting", "motion"],
     ["soundSetting", "sound"],
+    ["cursorSetting", "cursor"],
   ])
     dom[id].addEventListener("change", () => {
       if (readOnly) return;
@@ -519,6 +699,7 @@ function wireActions() {
       )
         return;
       state = replaceSave(data);
+      selectedItem = { type: "building", id: "marti" };
       lastSceneLevel = -1;
       lastGulls = -1;
       nextGolden = state.activeSeconds + 45;
@@ -543,6 +724,7 @@ function wireActions() {
     try {
       clearSave();
       state = createState();
+      selectedItem = { type: "building", id: "marti" };
       lastSceneLevel = -1;
       lastGulls = -1;
       nextGolden = 45;
@@ -598,11 +780,20 @@ function start(writable) {
     "resetGame",
     "motionSetting",
     "soundSetting",
+    "cursorSetting",
   ])
     dom[id].disabled = readOnly;
   buildInterface();
   mountScene(dom.skyline);
   applySettings();
+  musicController = createMusicController(dom.musicToggle, {
+    enabled: state.settings.music,
+    onChange: (enabled) => {
+      state.settings.music = enabled;
+      persist();
+    },
+    onError: toast,
+  });
   wireActions();
   initSharing();
   initChallenge();

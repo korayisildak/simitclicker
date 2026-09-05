@@ -1,4 +1,4 @@
-import { openShare, challengeTarget } from "./sharing.js?v=3.0.0";
+import { openShare, challengeTarget } from "./sharing.js?v=3.1.0";
 const $ = (id) => document.getElementById(id);
 const DURATION = 30_000;
 let running = false,

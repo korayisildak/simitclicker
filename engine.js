@@ -409,7 +409,7 @@ export function createState(now = Date.now()) {
     questIndex: 0,
     activeSeconds: 0,
     goldenUntil: 0,
-    settings: { motion: true, sound: false },
+    settings: { motion: true, sound: false, music: false, cursor: true },
     ts: number(now, 0, Number.MAX_SAFE_INTEGER),
   };
 }
@@ -450,7 +450,7 @@ export function normalizeSave(input, now = Date.now()) {
     );
   }
   const settings = own(input, "settings");
-  for (const key of ["motion", "sound"])
+  for (const key of ["motion", "sound", "music", "cursor"])
     if (typeof own(settings, key) === "boolean")
       state.settings[key] = settings[key];
   unlockAchievements(state);

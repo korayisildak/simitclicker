@@ -189,6 +189,32 @@ test("untrusted saves only retain known own fields and bounded finite numbers", 
   assert.equal(normalizeSave({ simit: Infinity }).simit, 0);
 });
 
+test("game presentation preferences migrate with safe defaults", () => {
+  const old = normalizeSave({
+    v: 3,
+    simit: 12,
+    settings: { motion: false, sound: true },
+  });
+  assert.deepEqual(old.settings, {
+    motion: false,
+    sound: true,
+    music: false,
+    cursor: true,
+  });
+  const saved = normalizeSave({
+    v: 3,
+    settings: { music: true, cursor: false },
+  });
+  assert.equal(saved.settings.music, true);
+  assert.equal(saved.settings.cursor, false);
+  const invalid = normalizeSave({
+    v: 3,
+    settings: { music: "true", cursor: 0 },
+  });
+  assert.equal(invalid.settings.music, false);
+  assert.equal(invalid.settings.cursor, true);
+});
+
 test("currency and ownership limits keep quotes and totals finite", () => {
   const s = createState();
   earn(s, MAX_CURRENCY);
